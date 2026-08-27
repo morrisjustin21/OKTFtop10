@@ -1,5 +1,6 @@
 export default function EventTabs({ events, activeEvent, onSelect }) {
   const track = events.filter((e) => e.category === 'track')
+  const relay = events.filter((e) => e.category === 'relay')
   const field = events.filter((e) => e.category === 'field')
 
   const renderGroup = (label, group) => (
@@ -28,7 +29,8 @@ export default function EventTabs({ events, activeEvent, onSelect }) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 pt-4">
-      {renderGroup('Track', track)}
+      {renderGroup('Individual', track)}
+      {renderGroup('Relays', relay)}
       {renderGroup('Field', field)}
     </div>
   )
