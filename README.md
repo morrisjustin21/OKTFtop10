@@ -29,6 +29,32 @@ vars are set, so you can preview the UI immediately without a database.
    results, writes restricted to authenticated users).
 3. Copy your project URL and anon key into `.env`.
 
+## PDF import
+
+The "Import PDF" tab on `/admin` parses meet result exports directly in
+the browser (nothing is uploaded to a server). The parser was built and
+tested against a real Ardmore Invitational results PDF — a format with
+event headings like `#7 Girls' 100 Meters High School [Finals]`, ALL CAPS
+team names, and a `Yr` grade column. Relay results are supported too:
+they attach to the team rather than a single athlete (see the schema
+note below).
+
+After choosing a file, every parsed result appears in an editable table
+— event, gender, athlete/relay leg, school, mark — before anything is
+saved. Rows marked DQ, DNF, NM, SCR, or similar are unchecked
+automatically since they aren't real marks; check the box to include one
+anyway if you want it recorded. Uncheck any row you don't want, or edit
+a field inline.
+
+If a different meet's PDF doesn't parse well (few or no rows found), its
+layout likely differs enough from the tested format — share a copy and
+the parser in `src/lib/resultsParser.js` can be adjusted to match.
+
+**Schema note**: relay results are stored against `school_id` instead of
+`athlete_id` (a relay result belongs to the team, not one runner). If you
+deployed the database before this feature, run
+`supabase/migrations/005_relay_results.sql` to add support.
+
 ## Admin page
 
 `/admin` is a staff-only page for managing data, starting with bulk team
