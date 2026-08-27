@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-lane text-charcoal font-body;
+}
+
+/* Signature motif: a dashed lane line, used as a section divider and as the
+   underline on the active event tab. Evokes the painted lines on a track
+   without leaning on a literal illustration. */
+.lane-line {
+  background-image: repeating-linear-gradient(
+    90deg,
+    theme('colors.lane') 0,
+    theme('colors.lane') 10px,
+    transparent 10px,
+    transparent 18px
+  );
+  background-color: theme('colors.cinder.DEFAULT');
+  height: 4px;
+}
+
+/* Numeric marks (times / distances) get a tabular, condensed treatment so
+   columns of results line up like a scoreboard. */
+.mark {
+  font-family: theme('fontFamily.mark');
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
