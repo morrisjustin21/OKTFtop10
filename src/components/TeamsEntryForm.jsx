@@ -12,6 +12,7 @@ export default function TeamsEntryForm() {
   const [teams, setTeams] = useState([])
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState(null) // { type: 'success' | 'error', message }
+  const [aliasDrafts, setAliasDrafts] = useState({}) // { [teamId]: 'text being typed' }
 
   useEffect(() => {
     loadTeams()
@@ -21,7 +22,7 @@ export default function TeamsEntryForm() {
   async function loadTeams() {
     const { data, error } = await supabase
       .from('schools')
-      .select('id, name')
+      .select('id, name, aliases')
       .eq('classification', classification)
       .order('name')
     if (!error) setTeams(data ?? [])
@@ -63,6 +64,29 @@ export default function TeamsEntryForm() {
 
   async function handleRemove(id) {
     const { error } = await supabase.from('schools').delete().eq('id', id)
+    if (!error) loadTeams()
+  }
+
+  async function handleAddAlias(team) {
+    const alias = (aliasDrafts[team.id] ?? '').trim()
+    if (!alias) return
+    const nextAliases = [...(team.aliases ?? []), alias]
+    const { error } = await supabase
+      .from('schools')
+      .update({ aliases: nextAliases })
+      .eq('id', team.id)
+    if (!error) {
+      setAliasDrafts((d) => ({ ...d, [team.id]: '' }))
+      loadTeams()
+    }
+  }
+
+  async function handleRemoveAlias(team, alias) {
+    const nextAliases = (team.aliases ?? []).filter((a) => a !== alias)
+    const { error } = await supabase
+      .from('schools')
+      .update({ aliases: nextAliases })
+      .eq('id', team.id)
     if (!error) loadTeams()
   }
 
@@ -123,14 +147,60 @@ export default function TeamsEntryForm() {
             <p className="px-4 py-4 text-sm text-graphite">No teams added yet.</p>
           ) : (
             teams.map((team) => (
-              <div key={team.id} className="flex items-center justify-between px-4 py-2 text-sm">
-                <span>{team.name}</span>
-                <button
-                  onClick={() => handleRemove(team.id)}
-                  className="text-xs text-graphite hover:text-red-600"
-                >
-                  Remove
-                </button>
+              <div key={team.id} className="px-4 py-2.5 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{team.name}</span>
+                  <button
+                    onClick={() => handleRemove(team.id)}
+                    className="text-xs text-graphite hover:text-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                {team.aliases?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {team.aliases.map((alias) => (
+                      <span
+                        key={alias}
+                        className="inline-flex items-center gap-1 bg-lane text-xs px-2 py-0.5 rounded-full"
+                      >
+                        {alias}
+                        <button
+                          onClick={() => handleRemoveAlias(team, alias)}
+                          className="text-graphite hover:text-red-600"
+                          aria-label={`Remove alias ${alias}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex gap-1.5 mt-1.5">
+                  <input
+                    type="text"
+                    value={aliasDrafts[team.id] ?? ''}
+                    onChange={(e) =>
+                      setAliasDrafts((d) => ({ ...d, [team.id]: e.target.value }))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddAlias(team)
+                      }
+                    }}
+                    placeholder="Add a nickname…"
+                    className="flex-1 border border-charcoal/20 rounded px-2 py-1 text-xs"
+                  />
+                  <button
+                    onClick={() => handleAddAlias(team)}
+                    className="text-xs px-2 py-1 border border-charcoal/20 rounded hover:bg-lane"
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
             ))
           )}
