@@ -17,12 +17,19 @@ const NON_SCORING_MARKS = new Set(['DNS', 'DNF', 'DQ', 'SCR', 'NM', 'NH'])
 
 function guessSchool(schools, schoolRaw) {
   if (!schoolRaw) return null
-  const q = schoolRaw.toLowerCase()
+  let q = schoolRaw.toLowerCase().trim()
+  // Long team names get truncated with an ellipsis in narrower table
+  // columns (e.g. "EDMOND NOR…" for Edmond North) — treat that as a
+  // prefix to match against, not a literal substring.
+  const truncated = q.endsWith('\u2026')
+  if (truncated) q = q.slice(0, -1).trim()
+
   return (
     schools.find((s) => s.name.toLowerCase() === q) ??
-    schools.find(
-      (s) => s.name.toLowerCase().includes(q) || (s.aliases ?? []).some((a) => a.toLowerCase() === q)
+    schools.find((s) =>
+      truncated ? s.name.toLowerCase().startsWith(q) : s.name.toLowerCase().includes(q)
     ) ??
+    schools.find((s) => (s.aliases ?? []).some((a) => a.toLowerCase() === q)) ??
     null
   )
 }
