@@ -36,8 +36,31 @@ export default function PdfImportForm() {
   const [parseError, setParseError] = useState(null)
   const [importing, setImporting] = useState(false)
   const [importSummary, setImportSummary] = useState(null)
+  const [pastedText, setPastedText] = useState('')
+  const [inputMode, setInputMode] = useState('pdf') // 'pdf' | 'paste'
 
   const schools = useSchools(classification)
+
+  function buildRowsFromParsed(parsed) {
+    if (parsed.length === 0) {
+      setParseError(
+        "Couldn't find any result rows. The layout may differ from what the parser expects — " +
+          'share a copy with me and I can tune it to match.'
+      )
+      setRows([])
+      return
+    }
+    setRows(
+      parsed.map((r, i) => ({
+        ...r,
+        id: i,
+        school: guessSchool(schools, r.schoolRaw),
+        // Non-scoring statuses (DQ, DNF, NM, etc.) aren't real marks —
+        // leave them unchecked so they don't get imported by mistake.
+        include: !NON_SCORING_MARKS.has(r.markRaw.toUpperCase()),
+      }))
+    )
+  }
 
   async function handleFileChange(e) {
     const file = e.target.files?.[0]
@@ -47,30 +70,19 @@ export default function PdfImportForm() {
     setParsing(true)
     try {
       const lines = await extractTextLines(file)
-      const parsed = parseResultsText(lines)
-      if (parsed.length === 0) {
-        setParseError(
-          "Couldn't find any result rows in this PDF. The layout may differ from what the " +
-            'parser expects — share a copy with me and I can tune it to match.'
-        )
-        setRows([])
-      } else {
-        setRows(
-          parsed.map((r, i) => ({
-            ...r,
-            id: i,
-            school: guessSchool(schools, r.schoolRaw),
-            // Non-scoring statuses (DQ, DNF, NM, etc.) aren't real marks —
-            // leave them unchecked so they don't get imported by mistake.
-            include: !NON_SCORING_MARKS.has(r.markRaw.toUpperCase()),
-          }))
-        )
-      }
+      buildRowsFromParsed(parseResultsText(lines))
     } catch (err) {
       setParseError(`Couldn't read that PDF: ${err.message}`)
     } finally {
       setParsing(false)
     }
+  }
+
+  function handleParsePastedText() {
+    setParseError(null)
+    setImportSummary(null)
+    const lines = pastedText.split('\n')
+    buildRowsFromParsed(parseResultsText(lines))
   }
 
   function updateRow(id, patch) {
@@ -202,13 +214,66 @@ export default function PdfImportForm() {
       </div>
 
       <div className="mb-4">
-        <label className="text-xs uppercase tracking-wide text-graphite">Results PDF</label>
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={handleFileChange}
-          className="block mt-1 text-sm"
-        />
+        <div className="flex gap-2 mb-2">
+          <button
+            type="button"
+            onClick={() => setInputMode('pdf')}
+            className={`text-xs px-3 py-1.5 rounded border ${
+              inputMode === 'pdf'
+                ? 'bg-cinder text-lane border-cinder'
+                : 'border-charcoal/20 text-graphite'
+            }`}
+          >
+            Upload PDF
+          </button>
+          <button
+            type="button"
+            onClick={() => setInputMode('paste')}
+            className={`text-xs px-3 py-1.5 rounded border ${
+              inputMode === 'paste'
+                ? 'bg-cinder text-lane border-cinder'
+                : 'border-charcoal/20 text-graphite'
+            }`}
+          >
+            Paste results text
+          </button>
+        </div>
+
+        {inputMode === 'pdf' ? (
+          <>
+            <label className="text-xs uppercase tracking-wide text-graphite">Results PDF</label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="block mt-1 text-sm"
+            />
+            <p className="text-xs text-graphite mt-1">
+              Only works if the PDF has real selectable text. A "print to PDF" of a results
+              webpage is often just a flattened image — if so, use "Paste results text" instead.
+            </p>
+          </>
+        ) : (
+          <>
+            <label className="text-xs uppercase tracking-wide text-graphite">
+              Paste results text
+            </label>
+            <textarea
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+              rows={8}
+              placeholder="Open the results webpage, select all the text, copy, and paste it here…"
+              className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1 text-sm font-mono"
+            />
+            <button
+              type="button"
+              onClick={handleParsePastedText}
+              className="mt-2 bg-cinder text-lane rounded px-4 py-1.5 text-sm font-body"
+            >
+              Parse text
+            </button>
+          </>
+        )}
       </div>
 
       {parsing && <p className="text-sm text-graphite">Reading the PDF…</p>}
