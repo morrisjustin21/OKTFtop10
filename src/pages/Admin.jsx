@@ -4,11 +4,12 @@ import { supabase } from '../lib/supabaseClient.js'
 import AdminLogin from '../components/AdminLogin.jsx'
 import TeamsEntryForm from '../components/TeamsEntryForm.jsx'
 import ResultsEntryForm from '../components/ResultsEntryForm.jsx'
+import PdfImportForm from '../components/PdfImportForm.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(null)
   const [checkedSession, setCheckedSession] = useState(false)
-  const [section, setSection] = useState('results') // 'results' | 'teams'
+  const [section, setSection] = useState('results') // 'results' | 'pdf' | 'teams'
 
   useEffect(() => {
     if (!supabase) {
@@ -75,6 +76,16 @@ export default function Admin() {
             Results entry
           </button>
           <button
+            onClick={() => setSection('pdf')}
+            className={`px-3 py-2 text-sm font-body border-b-2 ${
+              section === 'pdf'
+                ? 'border-cinder text-charcoal font-medium'
+                : 'border-transparent text-graphite hover:text-charcoal'
+            }`}
+          >
+            Import PDF
+          </button>
+          <button
             onClick={() => setSection('teams')}
             className={`px-3 py-2 text-sm font-body border-b-2 ${
               section === 'teams'
@@ -86,7 +97,9 @@ export default function Admin() {
           </button>
         </div>
 
-        {section === 'results' ? <ResultsEntryForm /> : <TeamsEntryForm />}
+        {section === 'results' && <ResultsEntryForm />}
+        {section === 'pdf' && <PdfImportForm />}
+        {section === 'teams' && <TeamsEntryForm />}
       </main>
     </div>
   )
