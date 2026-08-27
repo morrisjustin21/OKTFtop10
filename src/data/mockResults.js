@@ -1,18 +1,30 @@
-// Event catalog. `unit` drives how marks are formatted and sorted:
+// Event catalog, matching OSSAA's actual meet order for Oklahoma high
+// school track & field (no triple jump — it isn't run in OK).
+// `unit` drives how marks are formatted and sorted:
 // 'time' = ascending (lowest wins), 'distance' = descending (highest wins).
+// `category` drives which tab group an event shows up in: 'track'
+// (individual races), 'relay', or 'field'.
 export const EVENTS = [
+  // Individual track events
   { id: '100m', name: '100m dash', category: 'track', unit: 'time' },
   { id: '200m', name: '200m dash', category: 'track', unit: 'time' },
   { id: '400m', name: '400m dash', category: 'track', unit: 'time' },
   { id: '800m', name: '800m run', category: 'track', unit: 'time' },
   { id: '1600m', name: '1600m run', category: 'track', unit: 'time' },
   { id: '3200m', name: '3200m run', category: 'track', unit: 'time' },
-  { id: '110H', name: '110m hurdles', category: 'track', unit: 'time' },
+  // Girls run 100H, boys run 110H over the same event slot — tracked as
+  // one event so a single leaderboard tab covers both.
+  { id: 'shortH', name: '100m/110m hurdles', category: 'track', unit: 'time' },
   { id: '300H', name: '300m hurdles', category: 'track', unit: 'time' },
-  { id: '4x100', name: '4x100 relay', category: 'track', unit: 'time' },
-  { id: '4x400', name: '4x400 relay', category: 'track', unit: 'time' },
+
+  // Relays
+  { id: '4x100', name: '4x100m relay', category: 'relay', unit: 'time' },
+  { id: '4x200', name: '4x200m relay', category: 'relay', unit: 'time' },
+  { id: '4x400', name: '4x400m relay', category: 'relay', unit: 'time' },
+  { id: '4x800', name: '4x800m relay', category: 'relay', unit: 'time' },
+
+  // Field events
   { id: 'LJ', name: 'Long jump', category: 'field', unit: 'distance' },
-  { id: 'TJ', name: 'Triple jump', category: 'field', unit: 'distance' },
   { id: 'HJ', name: 'High jump', category: 'field', unit: 'distance' },
   { id: 'PV', name: 'Pole vault', category: 'field', unit: 'distance' },
   { id: 'SP', name: 'Shot put', category: 'field', unit: 'distance' },
