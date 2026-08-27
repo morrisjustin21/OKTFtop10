@@ -1,68 +1,64 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
-import AdminLogin from '../components/AdminLogin.jsx'
-import TeamsEntryForm from '../components/TeamsEntryForm.jsx'
 
-export default function Admin() {
-  const [session, setSession] = useState(null)
-  const [checkedSession, setCheckedSession] = useState(false)
+export default function AdminLogin({ onSignedIn }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (!supabase) {
-      setCheckedSession(true)
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    setLoading(false)
+    if (signInError) {
+      setError(signInError.message)
       return
     }
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setCheckedSession(true)
-    })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession)
-    })
-    return () => listener.subscription.unsubscribe()
-  }, [])
-
-  if (!supabase) {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-16 text-sm text-graphite">
-        Supabase isn&apos;t connected yet — add <code>VITE_SUPABASE_URL</code> and{' '}
-        <code>VITE_SUPABASE_ANON_KEY</code> to your environment before using the admin page.
-      </div>
-    )
-  }
-
-  if (!checkedSession) {
-    return <div className="max-w-lg mx-auto px-4 py-16 text-sm text-graphite">Loading…</div>
-  }
-
-  if (!session) {
-    return <AdminLogin onSignedIn={setSession} />
+    onSignedIn(data.session)
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-cinder text-lane">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <p className="font-display uppercase tracking-wide text-xl leading-none">Admin</p>
-            <p className="text-xs text-lane/80 mt-1">{session.user.email}</p>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to="/" className="underline">
-              View leaderboard
-            </Link>
-            <button onClick={() => supabase.auth.signOut()} className="underline">
-              Sign out
-            </button>
-          </div>
+    <div className="max-w-sm mx-auto px-4 py-16">
+      <p className="font-display uppercase tracking-wide text-xl mb-1">Staff login</p>
+      <p className="text-sm text-graphite mb-6">
+        Sign in with the staff account created in Supabase to manage teams and results.
+      </p>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label className="text-xs uppercase tracking-wide text-graphite">Email</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
+          />
         </div>
-      </div>
-      <div className="lane-line" />
-
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        <TeamsEntryForm />
-      </main>
+        <div>
+          <label className="text-xs uppercase tracking-wide text-graphite">Password</label>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
+          />
+        </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-cinder text-lane rounded px-3 py-2 font-body disabled:opacity-60"
+        >
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
     </div>
   )
 }
