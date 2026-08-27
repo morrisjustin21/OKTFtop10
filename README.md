@@ -29,6 +29,28 @@ vars are set, so you can preview the UI immediately without a database.
    results, writes restricted to authenticated users).
 3. Copy your project URL and anon key into `.env`.
 
+## Admin page
+
+`/admin` is a staff-only page for managing data, starting with bulk team
+entry. It's gated behind Supabase auth — you need to create at least one
+staff account before you can sign in:
+
+1. In Supabase, go to Authentication > Users > Add user. Set an email and
+   password (you can mark the email as already confirmed so no
+   verification email is needed).
+2. Run `supabase/migrations/003_schools_unique_constraint.sql` in the SQL
+   editor if you already deployed the original schema — it adds the
+   uniqueness rule that lets bulk team entry skip duplicates safely. If
+   you're setting up Supabase fresh, this is already included in
+   `schema.sql` and you can skip this step.
+3. Visit `your-site.vercel.app/admin` and sign in with that account.
+
+**Teams entry**: paste a list of school names (one per line) for a
+classification and submit — they're added in one batch, and pasting the
+same list again won't create duplicates. Every school you add here is
+then available to reference when entering athletes and results, which is
+what keeps everything grouped correctly by classification going forward.
+
 ## Design notes
 
 - **Color**: cinder-red (`#B7410E`) for the track surface identity, a
