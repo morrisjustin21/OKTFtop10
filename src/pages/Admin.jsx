@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import AdminLogin from '../components/AdminLogin.jsx'
 import TeamsEntryForm from '../components/TeamsEntryForm.jsx'
+import ResultsEntryForm from '../components/ResultsEntryForm.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(null)
   const [checkedSession, setCheckedSession] = useState(false)
+  const [section, setSection] = useState('results') // 'results' | 'teams'
 
   useEffect(() => {
     if (!supabase) {
@@ -61,7 +63,30 @@ export default function Admin() {
       <div className="lane-line" />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
-        <TeamsEntryForm />
+        <div className="flex gap-2 mb-6 border-b border-charcoal/10">
+          <button
+            onClick={() => setSection('results')}
+            className={`px-3 py-2 text-sm font-body border-b-2 ${
+              section === 'results'
+                ? 'border-cinder text-charcoal font-medium'
+                : 'border-transparent text-graphite hover:text-charcoal'
+            }`}
+          >
+            Results entry
+          </button>
+          <button
+            onClick={() => setSection('teams')}
+            className={`px-3 py-2 text-sm font-body border-b-2 ${
+              section === 'teams'
+                ? 'border-cinder text-charcoal font-medium'
+                : 'border-transparent text-graphite hover:text-charcoal'
+            }`}
+          >
+            Teams
+          </button>
+        </div>
+
+        {section === 'results' ? <ResultsEntryForm /> : <TeamsEntryForm />}
       </main>
     </div>
   )
