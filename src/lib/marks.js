@@ -15,16 +15,26 @@ function parseTime(raw) {
   return Number.isNaN(seconds) ? null : seconds
 }
 
-// Accepts "21'04\"" (feet + inches) or a plain decimal like "21.33" (feet)
-// — returns total feet as a decimal.
+// Accepts "21'04\"" (feet + inches), Hy-Tek's "21-04.00" (feet-inches.
+// hundredths) format, or a plain decimal like "21.33" (feet) — returns
+// total feet as a decimal.
 function parseDistance(raw) {
   const value = raw.trim()
-  const feetInches = value.match(/^(\d+)'\s*(\d+(?:\.\d+)?)"?$/)
-  if (feetInches) {
-    const feet = parseFloat(feetInches[1])
-    const inches = parseFloat(feetInches[2])
+
+  const feetInchesQuote = value.match(/^(\d+)'\s*(\d+(?:\.\d+)?)"?$/)
+  if (feetInchesQuote) {
+    const feet = parseFloat(feetInchesQuote[1])
+    const inches = parseFloat(feetInchesQuote[2])
     return feet + inches / 12
   }
+
+  const feetInchesDash = value.match(/^(\d+)-(\d+(?:\.\d+)?)$/)
+  if (feetInchesDash) {
+    const feet = parseFloat(feetInchesDash[1])
+    const inches = parseFloat(feetInchesDash[2])
+    return feet + inches / 12
+  }
+
   const decimal = parseFloat(value)
   return Number.isNaN(decimal) ? null : decimal
 }
