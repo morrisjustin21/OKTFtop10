@@ -32,7 +32,7 @@ create table if not exists athletes (
 create table if not exists events (
   id text primary key, -- short code, e.g. '100m', 'LJ' — matches src/data/mockResults.js
   name text not null,
-  category text not null check (category in ('track', 'field')),
+  category text not null check (category in ('track', 'relay', 'field')),
   unit text not null check (unit in ('time', 'distance')),
   sort_order int not null default 0
 );
@@ -92,7 +92,9 @@ create policy "authenticated write meets" on meets
 create policy "authenticated write results" on results
   for all using (auth.role() = 'authenticated');
 
--- Seed the event catalog to match src/data/mockResults.js
+-- Seed the event catalog to match src/data/mockResults.js — this is
+-- Oklahoma's actual OSSAA event list (no triple jump; includes 4x200
+-- and 4x800 relays).
 insert into events (id, name, category, unit, sort_order) values
   ('100m', '100m dash', 'track', 'time', 1),
   ('200m', '200m dash', 'track', 'time', 2),
@@ -100,14 +102,15 @@ insert into events (id, name, category, unit, sort_order) values
   ('800m', '800m run', 'track', 'time', 4),
   ('1600m', '1600m run', 'track', 'time', 5),
   ('3200m', '3200m run', 'track', 'time', 6),
-  ('110H', '110m hurdles', 'track', 'time', 7),
+  ('shortH', '100m/110m hurdles', 'track', 'time', 7),
   ('300H', '300m hurdles', 'track', 'time', 8),
-  ('4x100', '4x100 relay', 'track', 'time', 9),
-  ('4x400', '4x400 relay', 'track', 'time', 10),
-  ('LJ', 'Long jump', 'field', 'distance', 11),
-  ('TJ', 'Triple jump', 'field', 'distance', 12),
-  ('HJ', 'High jump', 'field', 'distance', 13),
-  ('PV', 'Pole vault', 'field', 'distance', 14),
-  ('SP', 'Shot put', 'field', 'distance', 15),
-  ('DT', 'Discus', 'field', 'distance', 16)
+  ('4x100', '4x100m relay', 'relay', 'time', 9),
+  ('4x200', '4x200m relay', 'relay', 'time', 10),
+  ('4x400', '4x400m relay', 'relay', 'time', 11),
+  ('4x800', '4x800m relay', 'relay', 'time', 12),
+  ('LJ', 'Long jump', 'field', 'distance', 13),
+  ('HJ', 'High jump', 'field', 'distance', 14),
+  ('PV', 'Pole vault', 'field', 'distance', 15),
+  ('SP', 'Shot put', 'field', 'distance', 16),
+  ('DT', 'Discus', 'field', 'distance', 17)
 on conflict (id) do nothing;
