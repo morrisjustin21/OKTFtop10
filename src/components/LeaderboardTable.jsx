@@ -32,7 +32,7 @@ export default function LeaderboardTable({ event, gender, results }) {
                   <td className="px-4 py-2.5">
                     <span
                       className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
-                        isLeader ? 'bg-gold text-white' : 'text-graphite'
+                        isLeader ? 'bg-accent text-white' : 'text-graphite'
                       }`}
                     >
                       {rank}
