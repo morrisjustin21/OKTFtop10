@@ -11,7 +11,7 @@ export default function Header({
   seasonId,
   onSeasonChange,
 }) {
-  const activeSeasonName = seasons.find((s) => s.id === seasonId)?.name ?? ''
+  const activeSeasonName = (seasons ?? []).find((s) => s.id === seasonId)?.name ?? ''
 
   return (
     <header>
@@ -19,9 +19,9 @@ export default function Header({
       <div className="bg-slate text-paper">
         <div className="max-w-4xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <svg width="34" height="24" viewBox="0 0 100 70" aria-hidden="true" className="shrink-0">
+            <svg width="36" height="18" viewBox="0 0 100 48.4" aria-hidden="true" className="shrink-0">
               <path
-                d="M0,3 L33,3 L33,22 L97,22 L97,58 L90,58 L90,64 L83,62 L76,65 L69,61 L62,64 L55,60 L48,63 L41,59 L34,62 L27,58 L20,61 L15,57 L15,22 L0,22 Z"
+                d="M0.0,0.0 L0.0,7.2 L34.7,7.2 L34.9,35.2 L38.6,37.8 L42.4,36.9 L44.6,40.0 L50.8,40.7 L52.5,42.2 L56.9,41.0 L58.8,44.8 L62.7,43.4 L65.5,45.8 L67.7,44.3 L68.2,47.0 L70.6,43.9 L71.6,45.3 L74.7,44.6 L77.8,47.5 L80.7,45.3 L86.5,44.1 L88.9,45.1 L91.1,43.6 L99.3,48.4 L100.0,21.4 L97.8,0.0 Z"
                 fill={OK_BLUE}
               />
             </svg>
