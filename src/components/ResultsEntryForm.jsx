@@ -5,7 +5,7 @@ import { useSchools } from '../lib/useSchools.js'
 import { findOrCreateMeet, findOrCreateAthlete, insertResult } from '../lib/resultsRepository.js'
 import SchoolPicker from './SchoolPicker.jsx'
 
-const CLASSIFICATIONS = ['5A', '6A']
+const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 
 export default function ResultsEntryForm() {
   const [classification, setClassification] = useState('5A')
