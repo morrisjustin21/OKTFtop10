@@ -252,7 +252,7 @@ export default function ResultsEntryForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-cinder text-lane rounded px-4 py-2 font-body disabled:opacity-60"
+            className="bg-accent text-white rounded px-4 py-2 font-body disabled:opacity-60"
           >
             {loading ? 'Adding…' : 'Add result'}
           </button>
