@@ -24,7 +24,7 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
     const { data, error } = await supabase
       .from('results')
       .select(
-        'id, mark_value, mark_display, relay_team, schools!inner(id, name, classification), relay_legs(leg_order, athletes(first_name, last_name))'
+        'id, mark_value, mark_display, relay_team, schools!inner(id, name, classification), relay_legs(leg_order, athletes(first_name, last_name)), meets(name, meet_date)'
       )
       .eq('event_id', eventId)
       .eq('gender', gender)
@@ -65,6 +65,8 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
               : 'Relay team',
         school: r.schools?.name ?? 'Unknown',
         mark: r.mark_display,
+        meetName: r.meets?.name ?? '',
+        meetDate: r.meets?.meet_date ?? null,
       })
       if (deduped.length >= topN) break
     }
@@ -74,7 +76,7 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
   const { data, error } = await supabase
     .from('results')
     .select(
-      'id, mark_value, mark_display, athletes!inner(id, first_name, last_name, schools!inner(name, classification))'
+      'id, mark_value, mark_display, athletes!inner(id, first_name, last_name, schools!inner(name, classification)), meets(name, meet_date)'
     )
     .eq('event_id', eventId)
     .eq('gender', gender)
@@ -101,6 +103,8 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
       athlete: `${r.athletes?.first_name ?? ''} ${r.athletes?.last_name ?? ''}`.trim(),
       school: r.athletes?.schools?.name ?? 'Unknown',
       mark: r.mark_display,
+      meetName: r.meets?.name ?? '',
+      meetDate: r.meets?.meet_date ?? null,
     })
     if (deduped.length >= topN) break
   }
