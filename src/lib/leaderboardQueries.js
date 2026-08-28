@@ -97,6 +97,7 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
     if (!athleteId || seen.has(athleteId)) continue
     seen.add(athleteId)
     deduped.push({
+      athleteId,
       athlete: `${r.athletes?.first_name ?? ''} ${r.athletes?.last_name ?? ''}`.trim(),
       school: r.athletes?.schools?.name ?? 'Unknown',
       mark: r.mark_display,
