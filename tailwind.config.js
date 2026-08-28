@@ -4,15 +4,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        // "Cinder" all-weather track surface red — the site's core identity color
-        cinder: {
-          DEFAULT: '#B7410E',
-          dark: '#7A2A09',
+        // "Slate" — neutral dark surface for the header and dark UI, paired
+        // with a single accent color rather than a literal track-surface hue.
+        slate: {
+          DEFAULT: '#2B2F36',
+          dark: '#1F232A',
         },
-        lane: '#F5F1E8', // lane-line cream, used as the light surface
-        charcoal: '#1F1C1A', // primary text, reads like track infield dirt
+        paper: '#F7F6F3', // off-white light surface
+        charcoal: '#1F1C1A', // primary text
         graphite: '#5B554C', // secondary text
-        gold: '#C99A2E', // leaderboard #1 / record accent, muted (not neon)
+        // Indigo-blue accent. Use `accent` (the saturated version) on light
+        // surfaces; use `accent-light` on dark surfaces, where the fully
+        // saturated color loses contrast against near-black.
+        accent: {
+          DEFAULT: '#3A3FE0',
+          light: '#6C72F0',
+        },
       },
       fontFamily: {
         display: ['"Oswald"', 'sans-serif'], // condensed, scoreboard-style
