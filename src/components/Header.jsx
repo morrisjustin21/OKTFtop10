@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-export default function Header({ gender, onGenderChange }) {
+export default function Header({ gender, onGenderChange, classification, onClassificationChange }) {
   return (
     <header>
       <div className="bg-slate text-paper">
@@ -9,22 +9,19 @@ export default function Header({ gender, onGenderChange }) {
             <p className="font-display uppercase tracking-wide text-2xl leading-none">
               OK Track Rankings
             </p>
-            <p className="text-sm text-paper/80 mt-1">Class 5A &middot; outdoor season</p>
+            <p className="text-sm text-paper/80 mt-1">Class {classification} &middot; outdoor season</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Only 5A is active for launch — schema already supports more classes */}
             <select
               className="bg-slate-dark text-paper border border-paper/30 rounded px-3 py-1.5 text-sm font-body"
-              value="5A"
-              disabled
+              value={classification}
+              onChange={(e) => onClassificationChange(e.target.value)}
             >
               <option value="5A">5A</option>
+              <option value="6A">6A</option>
               <option value="4A" disabled>
                 4A (coming soon)
-              </option>
-              <option value="6A" disabled>
-                6A (coming soon)
               </option>
             </select>
 
