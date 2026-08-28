@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { EVENTS } from '../data/mockResults.js'
 import { parseMarkValue } from '../lib/marks.js'
 import { useSchools } from '../lib/useSchools.js'
+import { useSeasons } from '../lib/useSeasons.js'
 import { findOrCreateMeet, findOrCreateAthlete, insertResult } from '../lib/resultsRepository.js'
 import SchoolPicker from './SchoolPicker.jsx'
 
 const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 
 export default function ResultsEntryForm() {
+  const { seasons, currentSeason } = useSeasons()
+  const [seasonId, setSeasonId] = useState('')
   const [classification, setClassification] = useState('5A')
   const [gender, setGender] = useState('boys')
   const [eventId, setEventId] = useState(EVENTS[0].id)
@@ -24,7 +27,11 @@ export default function ResultsEntryForm() {
   const [status, setStatus] = useState(null)
   const [sessionLog, setSessionLog] = useState([])
 
-  const schools = useSchools(classification)
+  useEffect(() => {
+    if (!seasonId && currentSeason) setSeasonId(currentSeason.id)
+  }, [seasonId, currentSeason])
+
+  const schools = useSchools(seasonId, classification)
   const activeEvent = EVENTS.find((e) => e.id === eventId)
 
   async function handleSubmit(e) {
@@ -57,7 +64,7 @@ export default function ResultsEntryForm() {
 
     setLoading(true)
     try {
-      const meetId = await findOrCreateMeet(meetName.trim(), meetDate)
+      const meetId = await findOrCreateMeet(meetName.trim(), meetDate, seasonId)
       const athleteId = await findOrCreateAthlete({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -104,7 +111,22 @@ export default function ResultsEntryForm() {
       <div>
         <p className="font-display uppercase tracking-wide text-lg mb-3">Add a result</p>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs uppercase tracking-wide text-graphite">Season</label>
+              <select
+                value={seasonId}
+                onChange={(e) => setSeasonId(e.target.value)}
+                className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
+              >
+                {seasons.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                    {s.is_current ? ' (current)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="text-xs uppercase tracking-wide text-graphite">
                 Classification
