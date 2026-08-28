@@ -77,6 +77,25 @@ function matchEventId(label) {
   return null
 }
 
+// Parses a relay leg-listing line like:
+//   1) Thompson, La'Bria 10  2) Paschel, Amir 12  3) Stubblefield, Zaelyn 11  4) Chenault, Taliyah 11
+// into an ordered array of { order, firstName, lastName }.
+const LEG_RE = /(\d)\)\s*([A-Za-z.'-]+(?:\s[A-Za-z.'-]+)*),\s*([A-Za-z0-9 .'()-]+?)(?=\s+\d\)|$)/g
+
+function parseRelayLegs(line) {
+  const legs = []
+  let match
+  LEG_RE.lastIndex = 0
+  while ((match = LEG_RE.exec(line)) !== null) {
+    const order = parseInt(match[1], 10)
+    const lastName = match[2].trim()
+    // The grade year trails the first name (e.g. "Ally 10") — strip it.
+    const firstName = match[3].trim().replace(/\s+\d{1,2}$/, '').trim()
+    legs.push({ order, firstName, lastName })
+  }
+  return legs
+}
+
 export function parseResultsText(lines) {
   const rows = []
   let currentEventId = null
@@ -95,7 +114,16 @@ export function parseResultsText(lines) {
 
     if (!currentEventId) continue
     if (/^(Team\s+Relay|Athlete\s+Yr)\b/i.test(line)) continue
-    if (line.startsWith('1)')) continue // relay leg listing — not needed for team results
+    if (/^\d\)/.test(line)) {
+      // Leg-listing line following a relay team row — attach the athlete
+      // names to that row rather than treating this as its own result.
+      const legs = parseRelayLegs(line)
+      const lastRow = rows[rows.length - 1]
+      if (legs.length > 0 && lastRow && lastRow.type === 'relay') {
+        lastRow.legs = legs
+      }
+      continue
+    }
 
     const relayMatch = line.match(RELAY_ROW_RE)
     if (relayMatch) {
