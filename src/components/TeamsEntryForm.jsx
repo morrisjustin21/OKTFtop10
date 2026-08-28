@@ -131,7 +131,7 @@ export default function TeamsEntryForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-cinder text-lane rounded px-4 py-2 font-body disabled:opacity-60"
+            className="bg-accent text-white rounded px-4 py-2 font-body disabled:opacity-60"
           >
             {loading ? 'Adding…' : 'Add teams'}
           </button>
@@ -163,7 +163,7 @@ export default function TeamsEntryForm() {
                     {team.aliases.map((alias) => (
                       <span
                         key={alias}
-                        className="inline-flex items-center gap-1 bg-lane text-xs px-2 py-0.5 rounded-full"
+                        className="inline-flex items-center gap-1 bg-paper text-xs px-2 py-0.5 rounded-full"
                       >
                         {alias}
                         <button
@@ -196,7 +196,7 @@ export default function TeamsEntryForm() {
                   />
                   <button
                     onClick={() => handleAddAlias(team)}
-                    className="text-xs px-2 py-1 border border-charcoal/20 rounded hover:bg-lane"
+                    className="text-xs px-2 py-1 border border-charcoal/20 rounded hover:bg-paper"
                   >
                     Add
                   </button>
