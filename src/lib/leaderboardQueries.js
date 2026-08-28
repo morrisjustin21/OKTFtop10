@@ -12,24 +12,43 @@ import { EVENTS, getResults as getMockResults } from '../data/mockResults.js'
 // first (i.e. best) row per athlete/team before trimming to topN.
 const FETCH_MULTIPLIER = 8
 
-export async function fetchLeaderboard(eventId, gender, classification, topN = 16) {
+export async function fetchLeaderboard(eventId, gender, seasonId, classification, topN = 16) {
   if (!supabase) return getMockResults(eventId, gender)
+  if (!seasonId || !classification) return []
 
   const event = EVENTS.find((e) => e.id === eventId)
   if (!event) return []
   const ascending = event.unit === 'time' // lower wins for times, higher for distances
   const fetchLimit = topN * FETCH_MULTIPLIER
 
+  // A school's classification is season-specific (school_seasons), so
+  // find which schools qualify for this season+classification first —
+  // a simple, reliable query — rather than trying to filter classification
+  // through a multi-level join on the results query itself.
+  const { data: schoolSeasons, error: ssError } = await supabase
+    .from('school_seasons')
+    .select('school_id')
+    .eq('season_id', seasonId)
+    .eq('classification', classification)
+  if (ssError) {
+    // eslint-disable-next-line no-console
+    console.error('school_seasons query error:', ssError)
+    return []
+  }
+  const schoolIds = (schoolSeasons ?? []).map((r) => r.school_id)
+  if (schoolIds.length === 0) return []
+
   if (event.category === 'relay') {
     const { data, error } = await supabase
       .from('results')
       .select(
-        'id, mark_value, mark_display, relay_team, schools!inner(id, name, classification), relay_legs(leg_order, athletes(first_name, last_name)), meets(name, meet_date)'
+        'id, mark_value, mark_display, relay_team, school_id, schools!inner(id, name), relay_legs(leg_order, athletes(first_name, last_name)), meets!inner(name, meet_date, season_id)'
       )
       .eq('event_id', eventId)
       .eq('gender', gender)
       .eq('verified', true)
-      .eq('schools.classification', classification)
+      .eq('meets.season_id', seasonId)
+      .in('school_id', schoolIds)
       .order('mark_value', { ascending })
       .limit(fetchLimit)
 
@@ -76,12 +95,13 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
   const { data, error } = await supabase
     .from('results')
     .select(
-      'id, mark_value, mark_display, athletes!inner(id, first_name, last_name, schools!inner(name, classification)), meets(name, meet_date)'
+      'id, mark_value, mark_display, athletes!inner(id, first_name, last_name, school_id, schools(name)), meets!inner(name, meet_date, season_id)'
     )
     .eq('event_id', eventId)
     .eq('gender', gender)
     .eq('verified', true)
-    .eq('athletes.schools.classification', classification)
+    .eq('meets.season_id', seasonId)
+    .in('athletes.school_id', schoolIds)
     .order('mark_value', { ascending })
     .limit(fetchLimit)
 
