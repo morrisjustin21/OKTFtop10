@@ -5,11 +5,12 @@ import AdminLogin from '../components/AdminLogin.jsx'
 import TeamsEntryForm from '../components/TeamsEntryForm.jsx'
 import ResultsEntryForm from '../components/ResultsEntryForm.jsx'
 import PdfImportForm from '../components/PdfImportForm.jsx'
+import SeasonsManager from '../components/SeasonsManager.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(null)
   const [checkedSession, setCheckedSession] = useState(false)
-  const [section, setSection] = useState('results') // 'results' | 'pdf' | 'teams'
+  const [section, setSection] = useState('results') // 'results' | 'pdf' | 'teams' | 'seasons'
 
   useEffect(() => {
     if (!supabase) {
@@ -95,11 +96,22 @@ export default function Admin() {
           >
             Teams
           </button>
+          <button
+            onClick={() => setSection('seasons')}
+            className={`px-3 py-2 text-sm font-body border-b-2 ${
+              section === 'seasons'
+                ? 'border-accent text-charcoal font-medium'
+                : 'border-transparent text-graphite hover:text-charcoal'
+            }`}
+          >
+            Seasons
+          </button>
         </div>
 
         {section === 'results' && <ResultsEntryForm />}
         {section === 'pdf' && <PdfImportForm />}
         {section === 'teams' && <TeamsEntryForm />}
+        {section === 'seasons' && <SeasonsManager />}
       </main>
     </div>
   )
