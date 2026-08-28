@@ -12,7 +12,7 @@ import {
 } from '../lib/resultsRepository.js'
 import SchoolPicker from './SchoolPicker.jsx'
 
-const CLASSIFICATIONS = ['5A', '6A']
+const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 const NON_SCORING_MARKS = new Set(['DNS', 'DNF', 'DQ', 'SCR', 'NM', 'NH'])
 
 function guessSchool(schools, schoolRaw) {
