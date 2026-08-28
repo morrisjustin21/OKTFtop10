@@ -4,7 +4,7 @@ import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
 import { formatDate } from '../lib/formatDate.js'
 import { useSchools } from '../lib/useSchools.js'
 
-const CLASSIFICATION = '5A'
+const CLASSIFICATIONS = ['5A', '6A']
 
 // Manually grouped (rather than auto-flowed) so each printed page has a
 // predictable, even layout instead of columns of wildly different heights.
@@ -42,15 +42,17 @@ const PAGE_LAYOUTS = [
 ]
 
 export default function PrintReport() {
+  const [classification, setClassification] = useState('5A')
   const [dataByGenderEvent, setDataByGenderEvent] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedSchoolId, setSelectedSchoolId] = useState('')
 
-  const schools = useSchools(CLASSIFICATION)
+  const schools = useSchools(classification)
   const selectedSchool = schools.find((s) => s.id === selectedSchoolId) ?? null
 
   useEffect(() => {
     let active = true
+    setLoading(true)
     async function loadAll() {
       const genders = ['boys', 'girls']
       const results = {}
@@ -58,7 +60,7 @@ export default function PrintReport() {
         results[gender] = {}
         await Promise.all(
           EVENTS.map(async (event) => {
-            results[gender][event.id] = await fetchLeaderboard(event.id, gender, CLASSIFICATION, 16)
+            results[gender][event.id] = await fetchLeaderboard(event.id, gender, classification, 16)
           })
         )
       }
@@ -71,7 +73,12 @@ export default function PrintReport() {
     return () => {
       active = false
     }
-  }, [])
+  }, [classification])
+
+  function handleClassificationChange(value) {
+    setClassification(value)
+    setSelectedSchoolId('')
+  }
 
   // With a school selected, an event only counts as "theirs" if one of
   // that school's own results actually appears in the top-16 board.
@@ -119,13 +126,24 @@ export default function PrintReport() {
 
       <div className="no-print flex items-center justify-between px-4 py-4 bg-paper border-b border-charcoal/10 sticky top-0 gap-4">
         <div>
-          <p className="font-display uppercase tracking-wide text-lg">5A rankings report</p>
+          <p className="font-display uppercase tracking-wide text-lg">{classification} rankings report</p>
           <p className="text-xs text-graphite">
             Use your browser's print dialog. To get each sheet's front and back on one physical
             page, enable "print on both sides" — otherwise front and back print separately.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <select
+            value={classification}
+            onChange={(e) => handleClassificationChange(e.target.value)}
+            className="border border-charcoal/20 rounded px-2 py-2 text-sm"
+          >
+            {CLASSIFICATIONS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
           <select
             value={selectedSchoolId}
             onChange={(e) => setSelectedSchoolId(e.target.value)}
@@ -169,7 +187,7 @@ export default function PrintReport() {
               <div key={`${gender}-${pageIndex}`} className="report-page">
                 <div className="flex items-baseline justify-between border-b-2 border-charcoal pb-1 mb-3 pt-4">
                   <p className="font-display uppercase tracking-wide text-sm">
-                    {gender === 'boys' ? 'Boys' : 'Girls'} 5A rankings — {page.label}
+                    {gender === 'boys' ? 'Boys' : 'Girls'} {classification} rankings — {page.label}
                     {selectedSchool ? ` — ${selectedSchool.name}` : ''}
                   </p>
                   <p style={{ fontSize: '8px', color: '#888' }}>
