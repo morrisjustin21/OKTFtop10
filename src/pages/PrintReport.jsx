@@ -4,7 +4,7 @@ import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
 import { formatDate } from '../lib/formatDate.js'
 import { useSchools } from '../lib/useSchools.js'
 
-const CLASSIFICATIONS = ['5A', '6A']
+const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 
 // Manually grouped (rather than auto-flowed) so each printed page has a
 // predictable, even layout instead of columns of wildly different heights.
