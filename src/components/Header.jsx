@@ -3,13 +3,26 @@ import { Link } from 'react-router-dom'
 export default function Header({ gender, onGenderChange, classification, onClassificationChange }) {
   return (
     <header>
+      <div style={{ background: '#005EB8', height: '5px' }} />
       <div className="bg-slate text-paper">
-        <div className="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="font-display uppercase tracking-wide text-2xl leading-none">
-              OK Track Rankings
-            </p>
-            <p className="text-sm text-paper/80 mt-1">Class {classification} &middot; outdoor season</p>
+        <div className="max-w-4xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <svg
+              width="30"
+              height="30"
+              viewBox="0 0 100 100"
+              fill="currentColor"
+              className="text-paper shrink-0"
+              aria-hidden="true"
+            >
+              <path d="M8,38 L8,52 L28,52 L28,34 L52,32 L55,16 L94,16 L96,54 L84,57 L84,94 L22,97 L18,68 L8,68 Z" />
+            </svg>
+            <div>
+              <p className="font-display uppercase tracking-wide text-2xl leading-none">
+                Oklahoma Track and Field Rankings
+              </p>
+              <p className="text-sm text-paper/80 mt-1">Class {classification} &middot; outdoor season</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
