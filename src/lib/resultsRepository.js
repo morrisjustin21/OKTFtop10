@@ -42,6 +42,7 @@ export async function insertResult({
   athleteId,
   eventId,
   meetId,
+  gender,
   markValue,
   markDisplay,
   wind,
@@ -52,6 +53,7 @@ export async function insertResult({
     athlete_id: athleteId,
     event_id: eventId,
     meet_id: meetId,
+    gender,
     mark_value: markValue,
     mark_display: markDisplay,
     wind: wind || null,
@@ -63,11 +65,13 @@ export async function insertResult({
 
 // Relay results belong to a team, not one athlete — school_id is set
 // instead of athlete_id (see the results_athlete_xor_school constraint).
+// gender is stored directly since there's no athlete to derive it from.
 export async function insertRelayResult({
   schoolId,
   relayTeam,
   eventId,
   meetId,
+  gender,
   markValue,
   markDisplay,
   source = 'manual',
@@ -78,6 +82,7 @@ export async function insertRelayResult({
     relay_team: relayTeam || null,
     event_id: eventId,
     meet_id: meetId,
+    gender,
     mark_value: markValue,
     mark_display: markDisplay,
     source,
