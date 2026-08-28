@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { EVENTS } from '../data/mockResults.js'
 import { parseMarkValue } from '../lib/marks.js'
 import { useSchools } from '../lib/useSchools.js'
+import { useSeasons } from '../lib/useSeasons.js'
 import { extractTextLines } from '../lib/pdfText.js'
 import { parseResultsText } from '../lib/resultsParser.js'
 import {
@@ -35,6 +36,8 @@ function guessSchool(schools, schoolRaw) {
 }
 
 export default function PdfImportForm() {
+  const { seasons, currentSeason } = useSeasons()
+  const [seasonId, setSeasonId] = useState('')
   const [classification, setClassification] = useState('5A')
   const [meetName, setMeetName] = useState('')
   const [meetDate, setMeetDate] = useState('')
@@ -46,7 +49,11 @@ export default function PdfImportForm() {
   const [pastedText, setPastedText] = useState('')
   const [inputMode, setInputMode] = useState('pdf') // 'pdf' | 'paste'
 
-  const schools = useSchools(classification)
+  useEffect(() => {
+    if (!seasonId && currentSeason) setSeasonId(currentSeason.id)
+  }, [seasonId, currentSeason])
+
+  const schools = useSchools(seasonId, classification)
 
   function buildRowsFromParsed(parsed) {
     if (parsed.length === 0) {
@@ -133,7 +140,7 @@ export default function PdfImportForm() {
     const failed = []
 
     try {
-      const meetId = await findOrCreateMeet(meetName.trim(), meetDate)
+      const meetId = await findOrCreateMeet(meetName.trim(), meetDate, seasonId)
 
       for (const row of rows) {
         if (!row.include) continue
@@ -217,7 +224,22 @@ export default function PdfImportForm() {
         unchecked automatically since they aren't real marks.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-3 mb-4">
+      <div className="grid md:grid-cols-4 gap-3 mb-4">
+        <div>
+          <label className="text-xs uppercase tracking-wide text-graphite">Season</label>
+          <select
+            value={seasonId}
+            onChange={(e) => setSeasonId(e.target.value)}
+            className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
+          >
+            {seasons.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+                {s.is_current ? ' (current)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label className="text-xs uppercase tracking-wide text-graphite">Classification</label>
           <select
