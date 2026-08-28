@@ -20,6 +20,8 @@ export default {
           DEFAULT: '#3A3FE0',
           light: '#6C72F0',
         },
+        silver: '#9CA3AC', // 2nd place
+        bronze: '#B87333', // 3rd place
       },
       fontFamily: {
         display: ['"Oswald"', 'sans-serif'], // condensed, scoreboard-style
