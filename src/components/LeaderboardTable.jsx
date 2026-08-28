@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function LeaderboardTable({ event, gender, results }) {
   return (
     <div className="bg-white border border-charcoal/10 rounded-lg overflow-hidden">
@@ -35,7 +37,7 @@ export default function LeaderboardTable({ event, gender, results }) {
                       ? 'bg-bronze text-white'
                       : 'text-graphite'
               return (
-                <tr key={`${r.athlete}-${r.meetDate}`} className="border-t border-charcoal/10">
+                <tr key={r.athleteId ?? `${r.athlete}-${r.school}`} className="border-t border-charcoal/10">
                   <td className="px-4 py-2.5">
                     <span
                       className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${badgeColor}`}
@@ -43,7 +45,15 @@ export default function LeaderboardTable({ event, gender, results }) {
                       {rank}
                     </span>
                   </td>
-                  <td className="px-2 py-2.5 font-medium">{r.athlete}</td>
+                  <td className="px-2 py-2.5 font-medium">
+                    {r.athleteId ? (
+                      <Link to={`/athlete/${r.athleteId}`} className="hover:underline">
+                        {r.athlete}
+                      </Link>
+                    ) : (
+                      r.athlete
+                    )}
+                  </td>
                   <td className="px-2 py-2.5 text-graphite">{r.school}</td>
                   <td className="px-4 py-2.5 text-right mark text-base">{r.mark}</td>
                 </tr>
