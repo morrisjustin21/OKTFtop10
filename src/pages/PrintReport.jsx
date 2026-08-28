@@ -1,26 +1,39 @@
 import { useEffect, useState } from 'react'
 import { EVENTS } from '../data/mockResults.js'
 import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
+import { formatDate } from '../lib/formatDate.js'
 
 const CLASSIFICATION = '5A'
 
 // Manually grouped (rather than auto-flowed) so each printed page has a
 // predictable, even layout instead of columns of wildly different heights.
-// Front: individual track events + the first relay. Back: remaining
-// relays + field events.
+// 4 pages = 2 physical sheets (front/back each) once double-sided printing
+// is enabled.
 const PAGE_LAYOUTS = [
   {
-    label: 'Front',
+    label: 'Sheet 1 \u00b7 Front \u2014 Relays',
     columns: [
-      ['100m', '200m', '400m'],
-      ['800m', '1600m', '3200m'],
-      ['shortH', '300H', '4x100'],
+      ['4x100', '4x200'],
+      ['4x400', '4x800'],
     ],
   },
   {
-    label: 'Back',
+    label: 'Sheet 1 \u00b7 Back \u2014 Sprints & middle distance',
     columns: [
-      ['4x200', '4x400', '4x800'],
+      ['100m', '200m'],
+      ['400m', '800m'],
+    ],
+  },
+  {
+    label: 'Sheet 2 \u00b7 Front \u2014 Distance & hurdles',
+    columns: [
+      ['1600m', '3200m'],
+      ['shortH', '300H'],
+    ],
+  },
+  {
+    label: 'Sheet 2 \u00b7 Back \u2014 Field events',
+    columns: [
       ['LJ', 'HJ', 'PV'],
       ['SP', 'DT'],
     ],
@@ -72,21 +85,21 @@ export default function PrintReport() {
         }
         .event-block {
           break-inside: avoid;
-          margin-bottom: 8px;
+          margin-bottom: 14px;
         }
         .report-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 9px;
-          line-height: 1.3;
+          font-size: 10px;
+          line-height: 1.4;
         }
         .report-table td {
-          padding: 1px 4px 1px 0;
+          padding: 1.5px 6px 1.5px 0;
         }
         .report-columns {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
           align-items: start;
         }
       `}</style>
@@ -95,8 +108,8 @@ export default function PrintReport() {
         <div>
           <p className="font-display uppercase tracking-wide text-lg">5A rankings report</p>
           <p className="text-xs text-graphite">
-            Use your browser's print dialog. To get boys (or girls) on one physical sheet,
-            enable "print on both sides" — otherwise front and back print as separate pages.
+            Use your browser's print dialog. To get each sheet's front and back on one physical
+            page, enable "print on both sides" — otherwise front and back print separately.
           </p>
         </div>
         <button
@@ -132,16 +145,25 @@ export default function PrintReport() {
                         <div key={eventId} className="event-block">
                           <p
                             style={{
-                              fontSize: '10px',
+                              fontSize: '12px',
                               fontWeight: 600,
                               textTransform: 'uppercase',
-                              marginBottom: '2px',
+                              marginBottom: '3px',
                               borderBottom: '1px solid #ccc',
                             }}
                           >
                             {event?.name ?? eventId}
                           </p>
                           <table className="report-table">
+                            <thead>
+                              <tr style={{ fontSize: '8px', color: '#888', textTransform: 'uppercase' }}>
+                                <td></td>
+                                <td>Athlete</td>
+                                <td>School</td>
+                                <td>Meet</td>
+                                <td style={{ textAlign: 'right' }}>Mark</td>
+                              </tr>
+                            </thead>
                             <tbody>
                               {rows.length === 0 && (
                                 <tr>
@@ -153,6 +175,10 @@ export default function PrintReport() {
                                   <td style={{ width: '12px' }}>{i + 1}</td>
                                   <td>{r.athlete}</td>
                                   <td style={{ color: '#666' }}>{r.school}</td>
+                                  <td style={{ color: '#666' }}>
+                                    {r.meetName}
+                                    {r.meetDate ? ` \u00b7 ${formatDate(r.meetDate)}` : ''}
+                                  </td>
                                   <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                                     {r.mark}
                                   </td>
