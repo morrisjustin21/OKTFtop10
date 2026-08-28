@@ -168,8 +168,16 @@ export default function PdfImportForm() {
       }
 
       setImportSummary({ succeeded, failed })
-      if (failed.length === 0) setRows(null)
-      else setRows(rows.filter((r) => failed.some((f) => f.row.id === r.id)))
+      if (failed.length === 0) {
+        setRows(null)
+      } else {
+        const reasonById = new Map(failed.map((f) => [f.row.id, f.reason]))
+        setRows(
+          rows
+            .filter((r) => reasonById.has(r.id))
+            .map((r) => ({ ...r, failReason: reasonById.get(r.id) }))
+        )
+      }
     } catch (err) {
       setParseError(err.message)
     } finally {
@@ -320,6 +328,9 @@ export default function PdfImportForm() {
                         checked={row.include}
                         onChange={(e) => updateRow(row.id, { include: e.target.checked })}
                       />
+                      {row.failReason && (
+                        <p className="text-xs text-red-600 mt-1 max-w-[140px]">{row.failReason}</p>
+                      )}
                     </td>
                     <td className="px-2 py-2">
                       <select
