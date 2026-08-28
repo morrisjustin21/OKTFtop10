@@ -16,7 +16,7 @@ export default function Leaderboard() {
   useEffect(() => {
     let active = true
     setLoading(true)
-    fetchLeaderboard(activeEventId, gender, '5A').then((data) => {
+    fetchLeaderboard(activeEventId, gender, '5A', 16).then((data) => {
       if (active) {
         setResults(data)
         setLoading(false)
