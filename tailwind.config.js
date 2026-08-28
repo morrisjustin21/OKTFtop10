@@ -22,6 +22,7 @@ export default {
         },
         silver: '#9CA3AC', // 2nd place
         bronze: '#B87333', // 3rd place
+        gold: '#C99A2E', // 1st place — muted gold, not neon
       },
       fontFamily: {
         display: ['"Oswald"', 'sans-serif'], // condensed, scoreboard-style
