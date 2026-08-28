@@ -26,14 +26,19 @@ export default function LeaderboardTable({ event, gender, results }) {
           <tbody>
             {results.map((r, i) => {
               const rank = i + 1
-              const isLeader = rank === 1
+              const badgeColor =
+                rank === 1
+                  ? 'bg-accent text-white'
+                  : rank === 2
+                    ? 'bg-silver text-white'
+                    : rank === 3
+                      ? 'bg-bronze text-white'
+                      : 'text-graphite'
               return (
                 <tr key={`${r.athlete}-${r.meetDate}`} className="border-t border-charcoal/10">
                   <td className="px-4 py-2.5">
                     <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
-                        isLeader ? 'bg-accent text-white' : 'text-graphite'
-                      }`}
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${badgeColor}`}
                     >
                       {rank}
                     </span>
