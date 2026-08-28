@@ -62,6 +62,17 @@ export default function PdfImportForm() {
         ...r,
         id: i,
         school: guessSchool(schools, r.schoolRaw),
+        legs:
+          r.type === 'relay'
+            ? r.legs && r.legs.length > 0
+              ? r.legs.map((l) => ({ firstName: l.firstName, lastName: l.lastName }))
+              : [
+                  { firstName: '', lastName: '' },
+                  { firstName: '', lastName: '' },
+                  { firstName: '', lastName: '' },
+                  { firstName: '', lastName: '' },
+                ]
+            : undefined,
         // Non-scoring statuses (DQ, DNF, NM, etc.) aren't real marks —
         // leave them unchecked so they don't get imported by mistake.
         include: !NON_SCORING_MARKS.has(r.markRaw.toUpperCase()),
@@ -94,6 +105,17 @@ export default function PdfImportForm() {
 
   function updateRow(id, patch) {
     setRows((current) => current.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+  }
+
+  function updateLeg(rowId, legIndex, patch) {
+    setRows((current) =>
+      current.map((r) => {
+        if (r.id !== rowId) return r
+        const legs = [...(r.legs ?? [])]
+        legs[legIndex] = { ...(legs[legIndex] ?? { firstName: '', lastName: '' }), ...patch }
+        return { ...r, legs }
+      })
+    )
   }
 
   function removeRow(id) {
@@ -136,6 +158,7 @@ export default function PdfImportForm() {
               gender: row.gender,
               markValue,
               markDisplay: row.markRaw.trim(),
+              legs: row.legs,
               source: 'csv',
               verified: true,
             })
@@ -360,9 +383,33 @@ export default function PdfImportForm() {
                     </td>
                     <td className="px-2 py-2">
                       {row.type === 'relay' ? (
-                        <span className="text-xs text-graphite">
-                          Relay team {row.relayTeam ? `'${row.relayTeam}'` : ''}
-                        </span>
+                        <div className="space-y-1">
+                          <p className="text-xs text-graphite">
+                            Relay {row.relayTeam ? `'${row.relayTeam}'` : ''}
+                          </p>
+                          {(row.legs ?? []).map((leg, i) => (
+                            <div key={i} className="flex gap-1">
+                              <input
+                                type="text"
+                                value={leg.firstName}
+                                onChange={(e) =>
+                                  updateLeg(row.id, i, { firstName: e.target.value })
+                                }
+                                placeholder="First"
+                                className="w-16 border border-charcoal/20 rounded px-1.5 py-0.5 text-xs"
+                              />
+                              <input
+                                type="text"
+                                value={leg.lastName}
+                                onChange={(e) =>
+                                  updateLeg(row.id, i, { lastName: e.target.value })
+                                }
+                                placeholder="Last"
+                                className="w-20 border border-charcoal/20 rounded px-1.5 py-0.5 text-xs"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <div className="flex gap-1">
                           <input
