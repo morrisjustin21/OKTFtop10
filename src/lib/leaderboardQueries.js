@@ -1,0 +1,59 @@
+import { supabase } from './supabaseClient.js'
+import { EVENTS, getResults as getMockResults } from '../data/mockResults.js'
+
+// Individual/field events join through athletes to get the school name.
+// Relay events join straight to schools, since a relay result belongs to
+// a team rather than one athlete (see supabase/schema.sql).
+export async function fetchLeaderboard(eventId, gender, classification, limit = 50) {
+  if (!supabase) return getMockResults(eventId, gender)
+
+  const event = EVENTS.find((e) => e.id === eventId)
+  if (!event) return []
+  const ascending = event.unit === 'time' // lower wins for times, higher for distances
+
+  if (event.category === 'relay') {
+    const { data, error } = await supabase
+      .from('results')
+      .select('id, mark_value, mark_display, relay_team, schools!inner(name, classification)')
+      .eq('event_id', eventId)
+      .eq('gender', gender)
+      .eq('verified', true)
+      .eq('schools.classification', classification)
+      .order('mark_value', { ascending })
+      .limit(limit)
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error('Leaderboard query error (relay):', error)
+      return []
+    }
+    return (data ?? []).map((r) => ({
+      athlete: r.relay_team ? `Relay '${r.relay_team}'` : 'Relay team',
+      school: r.schools?.name ?? 'Unknown',
+      mark: r.mark_display,
+    }))
+  }
+
+  const { data, error } = await supabase
+    .from('results')
+    .select(
+      'id, mark_value, mark_display, athletes!inner(first_name, last_name, schools!inner(name, classification))'
+    )
+    .eq('event_id', eventId)
+    .eq('gender', gender)
+    .eq('verified', true)
+    .eq('athletes.schools.classification', classification)
+    .order('mark_value', { ascending })
+    .limit(limit)
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error('Leaderboard query error:', error)
+    return []
+  }
+  return (data ?? []).map((r) => ({
+    athlete: `${r.athletes?.first_name ?? ''} ${r.athletes?.last_name ?? ''}`.trim(),
+    school: r.athletes?.schools?.name ?? 'Unknown',
+    mark: r.mark_display,
+  }))
+}
