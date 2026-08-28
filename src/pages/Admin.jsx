@@ -45,11 +45,11 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-cinder text-lane">
+      <div className="bg-slate text-paper">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <p className="font-display uppercase tracking-wide text-xl leading-none">Admin</p>
-            <p className="text-xs text-lane/80 mt-1">{session.user.email}</p>
+            <p className="text-xs text-paper/80 mt-1">{session.user.email}</p>
           </div>
           <div className="flex items-center gap-4 text-sm">
             <Link to="/" className="underline">
@@ -69,7 +69,7 @@ export default function Admin() {
             onClick={() => setSection('results')}
             className={`px-3 py-2 text-sm font-body border-b-2 ${
               section === 'results'
-                ? 'border-cinder text-charcoal font-medium'
+                ? 'border-accent text-charcoal font-medium'
                 : 'border-transparent text-graphite hover:text-charcoal'
             }`}
           >
@@ -79,7 +79,7 @@ export default function Admin() {
             onClick={() => setSection('pdf')}
             className={`px-3 py-2 text-sm font-body border-b-2 ${
               section === 'pdf'
-                ? 'border-cinder text-charcoal font-medium'
+                ? 'border-accent text-charcoal font-medium'
                 : 'border-transparent text-graphite hover:text-charcoal'
             }`}
           >
@@ -89,7 +89,7 @@ export default function Admin() {
             onClick={() => setSection('teams')}
             className={`px-3 py-2 text-sm font-body border-b-2 ${
               section === 'teams'
-                ? 'border-cinder text-charcoal font-medium'
+                ? 'border-accent text-charcoal font-medium'
                 : 'border-transparent text-graphite hover:text-charcoal'
             }`}
           >
