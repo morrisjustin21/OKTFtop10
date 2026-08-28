@@ -1,15 +1,31 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from '../components/Header.jsx'
 import EventTabs from '../components/EventTabs.jsx'
 import LeaderboardTable from '../components/LeaderboardTable.jsx'
-import { EVENTS, getResults } from '../data/mockResults.js'
+import { EVENTS } from '../data/mockResults.js'
+import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
 
 export default function Leaderboard() {
   const [gender, setGender] = useState('boys')
   const [activeEventId, setActiveEventId] = useState(EVENTS[0].id)
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const activeEvent = EVENTS.find((e) => e.id === activeEventId)
-  const results = getResults(activeEventId, gender)
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    fetchLeaderboard(activeEventId, gender, '5A').then((data) => {
+      if (active) {
+        setResults(data)
+        setLoading(false)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [activeEventId, gender])
 
   return (
     <div className="min-h-screen">
@@ -17,7 +33,11 @@ export default function Leaderboard() {
       <EventTabs events={EVENTS} activeEvent={activeEventId} onSelect={setActiveEventId} />
 
       <main className="max-w-4xl mx-auto px-4 py-4">
-        <LeaderboardTable event={activeEvent} gender={gender} results={results} />
+        {loading ? (
+          <p className="text-sm text-graphite">Loading leaderboard…</p>
+        ) : (
+          <LeaderboardTable event={activeEvent} gender={gender} results={results} />
+        )}
       </main>
     </div>
   )
