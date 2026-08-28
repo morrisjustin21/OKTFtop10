@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { formatDate } from '../lib/formatDate.js'
 
 export default function LeaderboardTable({ event, gender, results }) {
   return (
@@ -54,7 +55,15 @@ export default function LeaderboardTable({ event, gender, results }) {
                       r.athlete
                     )}
                   </td>
-                  <td className="px-2 py-2.5 text-graphite">{r.school}</td>
+                  <td className="px-2 py-2.5 text-graphite">
+                    {r.school}
+                    {r.meetName && (
+                      <p className="text-xs text-graphite/70">
+                        {r.meetName}
+                        {r.meetDate && ` \u00b7 ${formatDate(r.meetDate)}`}
+                      </p>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5 text-right mark text-base">{r.mark}</td>
                 </tr>
               )
