@@ -1,31 +1,53 @@
 import { Link } from 'react-router-dom'
 
-export default function Header({ gender, onGenderChange, classification, onClassificationChange }) {
+const OK_BLUE = '#0073CF'
+
+export default function Header({
+  gender,
+  onGenderChange,
+  classification,
+  onClassificationChange,
+  seasons,
+  seasonId,
+  onSeasonChange,
+}) {
+  const activeSeasonName = seasons.find((s) => s.id === seasonId)?.name ?? ''
+
   return (
     <header>
-      <div style={{ background: '#005EB8', height: '5px' }} />
+      <div style={{ background: OK_BLUE, height: '5px' }} />
       <div className="bg-slate text-paper">
         <div className="max-w-4xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <svg
-              width="30"
-              height="30"
-              viewBox="0 0 100 100"
-              fill="currentColor"
-              className="text-paper shrink-0"
-              aria-hidden="true"
-            >
-              <path d="M8,38 L8,52 L28,52 L28,34 L52,32 L55,16 L94,16 L96,54 L84,57 L84,94 L22,97 L18,68 L8,68 Z" />
+            <svg width="34" height="24" viewBox="0 0 100 70" aria-hidden="true" className="shrink-0">
+              <path
+                d="M0,3 L33,3 L33,22 L97,22 L97,58 L90,58 L90,64 L83,62 L76,65 L69,61 L62,64 L55,60 L48,63 L41,59 L34,62 L27,58 L20,61 L15,57 L15,22 L0,22 Z"
+                fill={OK_BLUE}
+              />
             </svg>
             <div>
               <p className="font-display uppercase tracking-wide text-2xl leading-none">
                 Oklahoma Track and Field Rankings
               </p>
-              <p className="text-sm text-paper/80 mt-1">Class {classification} &middot; outdoor season</p>
+              <p className="text-sm text-paper/80 mt-1">
+                Class {classification} &middot; {activeSeasonName}
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <select
+              className="bg-slate-dark text-paper border border-paper/30 rounded px-3 py-1.5 text-sm font-body"
+              value={seasonId}
+              onChange={(e) => onSeasonChange(e.target.value)}
+            >
+              {seasons.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+
             <select
               className="bg-slate-dark text-paper border border-paper/30 rounded px-3 py-1.5 text-sm font-body"
               value={classification}
