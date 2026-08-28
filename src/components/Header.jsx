@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Header({ gender, onGenderChange }) {
   return (
     <header>
@@ -44,6 +46,13 @@ export default function Header({ gender, onGenderChange }) {
                 Girls
               </button>
             </div>
+
+            <Link
+              to="/print"
+              className="text-sm underline text-paper/80 hover:text-paper whitespace-nowrap"
+            >
+              Print report
+            </Link>
           </div>
         </div>
       </div>
