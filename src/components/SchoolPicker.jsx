@@ -49,7 +49,7 @@ export default function SchoolPicker({ schools, value, onChange, placeholder }) 
               type="button"
               key={s.id}
               onClick={() => handleSelect(s)}
-              className="block w-full text-left px-3 py-2 text-sm hover:bg-lane"
+              className="block w-full text-left px-3 py-2 text-sm hover:bg-paper"
             >
               {s.name}
               {s.aliases?.length > 0 && (
