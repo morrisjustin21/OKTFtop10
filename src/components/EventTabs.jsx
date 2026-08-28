@@ -15,7 +15,7 @@ export default function EventTabs({ events, activeEvent, onSelect }) {
               onClick={() => onSelect(event.id)}
               className={`shrink-0 px-3 py-1.5 text-sm font-body rounded-t border-b-2 whitespace-nowrap ${
                 isActive
-                  ? 'border-cinder text-charcoal font-medium'
+                  ? 'border-accent text-charcoal font-medium'
                   : 'border-transparent text-graphite hover:text-charcoal'
               }`}
             >
