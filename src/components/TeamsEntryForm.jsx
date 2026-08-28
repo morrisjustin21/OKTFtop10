@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient.js'
 // Only 5A is open for entry at launch — same restriction as the public
 // leaderboard's classification switcher. Add more codes here once you're
 // ready to expand (they also need a row in the `classifications` table).
-const CLASSIFICATIONS = ['5A']
+const CLASSIFICATIONS = ['5A', '6A']
 
 export default function TeamsEntryForm() {
   const [classification, setClassification] = useState('5A')
