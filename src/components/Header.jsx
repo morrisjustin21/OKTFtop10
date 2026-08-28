@@ -18,11 +18,12 @@ export default function Header({ gender, onGenderChange, classification, onClass
               value={classification}
               onChange={(e) => onClassificationChange(e.target.value)}
             >
-              <option value="5A">5A</option>
               <option value="6A">6A</option>
-              <option value="4A" disabled>
-                4A (coming soon)
-              </option>
+              <option value="5A">5A</option>
+              <option value="4A">4A</option>
+              <option value="3A">3A</option>
+              <option value="2A">2A</option>
+              <option value="A">A</option>
             </select>
 
             <div className="flex bg-slate-dark rounded overflow-hidden border border-paper/30">
