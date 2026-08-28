@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { EVENTS } from '../data/mockResults.js'
 import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
 import { formatDate } from '../lib/formatDate.js'
+import { useSchools } from '../lib/useSchools.js'
 
 const CLASSIFICATION = '5A'
 
@@ -43,6 +44,10 @@ const PAGE_LAYOUTS = [
 export default function PrintReport() {
   const [dataByGenderEvent, setDataByGenderEvent] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [selectedSchoolId, setSelectedSchoolId] = useState('')
+
+  const schools = useSchools(CLASSIFICATION)
+  const selectedSchool = schools.find((s) => s.id === selectedSchoolId) ?? null
 
   useEffect(() => {
     let active = true
@@ -67,6 +72,14 @@ export default function PrintReport() {
       active = false
     }
   }, [])
+
+  // With a school selected, an event only counts as "theirs" if one of
+  // that school's own results actually appears in the top-16 board.
+  function eventHasSchool(gender, eventId) {
+    if (!selectedSchool) return true
+    const rows = dataByGenderEvent?.[gender]?.[eventId] ?? []
+    return rows.some((r) => r.school?.toLowerCase() === selectedSchool.name.toLowerCase())
+  }
 
   return (
     <div>
@@ -104,7 +117,7 @@ export default function PrintReport() {
         }
       `}</style>
 
-      <div className="no-print flex items-center justify-between px-4 py-4 bg-paper border-b border-charcoal/10 sticky top-0">
+      <div className="no-print flex items-center justify-between px-4 py-4 bg-paper border-b border-charcoal/10 sticky top-0 gap-4">
         <div>
           <p className="font-display uppercase tracking-wide text-lg">5A rankings report</p>
           <p className="text-xs text-graphite">
@@ -112,90 +125,128 @@ export default function PrintReport() {
             page, enable "print on both sides" — otherwise front and back print separately.
           </p>
         </div>
-        <button
-          onClick={() => window.print()}
-          disabled={loading}
-          className="no-print-report-btn bg-accent text-white rounded px-4 py-2 text-sm font-body disabled:opacity-60 shrink-0 ml-4"
-        >
-          {loading ? 'Loading…' : 'Print / Save as PDF'}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <select
+            value={selectedSchoolId}
+            onChange={(e) => setSelectedSchoolId(e.target.value)}
+            className="border border-charcoal/20 rounded px-2 py-2 text-sm"
+          >
+            <option value="">All schools (full report)</option>
+            {schools.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => window.print()}
+            disabled={loading}
+            className="no-print-report-btn bg-accent text-white rounded px-4 py-2 text-sm font-body disabled:opacity-60 whitespace-nowrap"
+          >
+            {loading ? 'Loading…' : 'Print / Save as PDF'}
+          </button>
+        </div>
       </div>
+
+      {selectedSchool && (
+        <p className="no-print px-4 py-2 text-xs text-graphite bg-paper">
+          Showing only events where {selectedSchool.name} has a ranked athlete or relay team.
+        </p>
+      )}
 
       {loading ? (
         <p className="p-6 text-sm text-graphite">Loading rankings for every event…</p>
       ) : (
         ['boys', 'girls'].map((gender) =>
-          PAGE_LAYOUTS.map((page, pageIndex) => (
-            <div key={`${gender}-${pageIndex}`} className="report-page">
-              <div className="flex items-baseline justify-between border-b-2 border-charcoal pb-1 mb-3 pt-4">
-                <p className="font-display uppercase tracking-wide text-sm">
-                  {gender === 'boys' ? 'Boys' : 'Girls'} 5A rankings — {page.label}
-                </p>
-                <p style={{ fontSize: '8px', color: '#888' }}>
-                  Generated {new Date().toLocaleDateString()}
-                </p>
-              </div>
-              <div className="report-columns">
-                {page.columns.map((eventIds, colIndex) => (
-                  <div key={colIndex}>
-                    {eventIds.map((eventId) => {
-                      const event = EVENTS.find((e) => e.id === eventId)
-                      const rows = dataByGenderEvent[gender]?.[eventId] ?? []
-                      return (
-                        <div key={eventId} className="event-block">
-                          <p
-                            style={{
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              textTransform: 'uppercase',
-                              marginBottom: '3px',
-                              borderBottom: '1px solid #ccc',
-                            }}
-                          >
-                            {event?.name ?? eventId}
-                          </p>
-                          <table className="report-table">
-                            <thead>
-                              <tr style={{ fontSize: '8px', color: '#888', textTransform: 'uppercase' }}>
-                                <td></td>
-                                <td>Athlete</td>
-                                <td>School</td>
-                                <td>Meet</td>
-                                <td style={{ textAlign: 'right' }}>Mark</td>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {rows.length === 0 && (
-                                <tr>
-                                  <td style={{ color: '#999' }}>No marks yet</td>
+          PAGE_LAYOUTS.map((page, pageIndex) => {
+            const filteredColumns = page.columns.map((eventIds) =>
+              eventIds.filter((eventId) => eventHasSchool(gender, eventId))
+            )
+            const totalEvents = filteredColumns.reduce((sum, col) => sum + col.length, 0)
+            if (totalEvents === 0) return null
+
+            return (
+              <div key={`${gender}-${pageIndex}`} className="report-page">
+                <div className="flex items-baseline justify-between border-b-2 border-charcoal pb-1 mb-3 pt-4">
+                  <p className="font-display uppercase tracking-wide text-sm">
+                    {gender === 'boys' ? 'Boys' : 'Girls'} 5A rankings — {page.label}
+                    {selectedSchool ? ` — ${selectedSchool.name}` : ''}
+                  </p>
+                  <p style={{ fontSize: '8px', color: '#888' }}>
+                    Generated {new Date().toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="report-columns">
+                  {filteredColumns.map((eventIds, colIndex) => (
+                    <div key={colIndex}>
+                      {eventIds.map((eventId) => {
+                        const event = EVENTS.find((e) => e.id === eventId)
+                        const rows = dataByGenderEvent[gender]?.[eventId] ?? []
+                        return (
+                          <div key={eventId} className="event-block">
+                            <p
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                marginBottom: '3px',
+                                borderBottom: '1px solid #ccc',
+                              }}
+                            >
+                              {event?.name ?? eventId}
+                            </p>
+                            <table className="report-table">
+                              <thead>
+                                <tr
+                                  style={{ fontSize: '8px', color: '#888', textTransform: 'uppercase' }}
+                                >
+                                  <td></td>
+                                  <td>Athlete</td>
+                                  <td>School</td>
+                                  <td>Meet</td>
+                                  <td style={{ textAlign: 'right' }}>Mark</td>
                                 </tr>
-                              )}
-                              {rows.map((r, i) => (
-                                <tr key={i}>
-                                  <td style={{ width: '12px' }}>{i + 1}</td>
-                                  <td>{r.athlete}</td>
-                                  <td style={{ color: '#666' }}>{r.school}</td>
-                                  <td style={{ color: '#666' }}>
-                                    {r.meetName}
-                                    {r.meetDate ? ` \u00b7 ${formatDate(r.meetDate)}` : ''}
-                                  </td>
-                                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                    {r.mark}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
+                              </thead>
+                              <tbody>
+                                {rows.map((r, i) => (
+                                  <tr key={i}>
+                                    <td style={{ width: '12px' }}>{i + 1}</td>
+                                    <td>{r.athlete}</td>
+                                    <td style={{ color: '#666' }}>{r.school}</td>
+                                    <td style={{ color: '#666' }}>
+                                      {r.meetName}
+                                      {r.meetDate ? ` \u00b7 ${formatDate(r.meetDate)}` : ''}
+                                    </td>
+                                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                      {r.mark}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )
       )}
+
+      {!loading &&
+        selectedSchool &&
+        ['boys', 'girls'].every((gender) =>
+          PAGE_LAYOUTS.every((page) =>
+            page.columns.every((col) => col.every((eventId) => !eventHasSchool(gender, eventId)))
+          )
+        ) && (
+          <p className="p-6 text-sm text-graphite">
+            No results found for {selectedSchool.name} yet.
+          </p>
+        )}
     </div>
   )
 }
