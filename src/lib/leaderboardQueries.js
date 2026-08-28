@@ -23,7 +23,9 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
   if (event.category === 'relay') {
     const { data, error } = await supabase
       .from('results')
-      .select('id, mark_value, mark_display, relay_team, schools!inner(id, name, classification)')
+      .select(
+        'id, mark_value, mark_display, relay_team, schools!inner(id, name, classification), relay_legs(leg_order, athletes(first_name, last_name))'
+      )
       .eq('event_id', eventId)
       .eq('gender', gender)
       .eq('verified', true)
@@ -45,8 +47,22 @@ export async function fetchLeaderboard(eventId, gender, classification, topN = 1
       const schoolId = r.schools?.id
       if (!schoolId || seen.has(schoolId)) continue
       seen.add(schoolId)
+
+      // Show the runners' names if this result has legs recorded;
+      // otherwise fall back to just the team label (older imports).
+      const legNames = (r.relay_legs ?? [])
+        .slice()
+        .sort((a, b) => a.leg_order - b.leg_order)
+        .map((l) => `${l.athletes?.first_name ?? ''} ${l.athletes?.last_name ?? ''}`.trim())
+        .filter(Boolean)
+
       deduped.push({
-        athlete: r.relay_team ? `Relay '${r.relay_team}'` : 'Relay team',
+        athlete:
+          legNames.length > 0
+            ? legNames.join(', ')
+            : r.relay_team
+              ? `Relay '${r.relay_team}'`
+              : 'Relay team',
         school: r.schools?.name ?? 'Unknown',
         mark: r.mark_display,
       })
