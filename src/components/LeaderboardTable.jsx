@@ -28,7 +28,7 @@ export default function LeaderboardTable({ event, gender, results }) {
               const rank = i + 1
               const badgeColor =
                 rank === 1
-                  ? 'bg-accent text-white'
+                  ? 'bg-gold text-white'
                   : rank === 2
                     ? 'bg-silver text-white'
                     : rank === 3
