@@ -54,7 +54,7 @@ export default function AdminLogin({ onSignedIn }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-cinder text-lane rounded px-3 py-2 font-body disabled:opacity-60"
+          className="w-full bg-accent text-white rounded px-3 py-2 font-body disabled:opacity-60"
         >
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
