@@ -237,7 +237,7 @@ export default function PdfImportForm() {
             onClick={() => setInputMode('pdf')}
             className={`text-xs px-3 py-1.5 rounded border ${
               inputMode === 'pdf'
-                ? 'bg-cinder text-lane border-cinder'
+                ? 'bg-accent text-white border-accent'
                 : 'border-charcoal/20 text-graphite'
             }`}
           >
@@ -248,7 +248,7 @@ export default function PdfImportForm() {
             onClick={() => setInputMode('paste')}
             className={`text-xs px-3 py-1.5 rounded border ${
               inputMode === 'paste'
-                ? 'bg-cinder text-lane border-cinder'
+                ? 'bg-accent text-white border-accent'
                 : 'border-charcoal/20 text-graphite'
             }`}
           >
@@ -285,7 +285,7 @@ export default function PdfImportForm() {
             <button
               type="button"
               onClick={handleParsePastedText}
-              className="mt-2 bg-cinder text-lane rounded px-4 py-1.5 text-sm font-body"
+              className="mt-2 bg-accent text-white rounded px-4 py-1.5 text-sm font-body"
             >
               Parse text
             </button>
@@ -415,7 +415,7 @@ export default function PdfImportForm() {
           <button
             onClick={handleImport}
             disabled={importing}
-            className="bg-cinder text-lane rounded px-4 py-2 font-body disabled:opacity-60"
+            className="bg-accent text-white rounded px-4 py-2 font-body disabled:opacity-60"
           >
             {importing ? 'Importing…' : `Import ${rows.filter((r) => r.include).length} result(s)`}
           </button>
