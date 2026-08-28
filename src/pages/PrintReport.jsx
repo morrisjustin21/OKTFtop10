@@ -3,6 +3,7 @@ import { EVENTS } from '../data/mockResults.js'
 import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
 import { formatDate } from '../lib/formatDate.js'
 import { useSchools } from '../lib/useSchools.js'
+import { useSeasons } from '../lib/useSeasons.js'
 
 const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 
@@ -42,15 +43,22 @@ const PAGE_LAYOUTS = [
 ]
 
 export default function PrintReport() {
+  const { seasons, currentSeason } = useSeasons()
+  const [seasonId, setSeasonId] = useState('')
   const [classification, setClassification] = useState('5A')
   const [dataByGenderEvent, setDataByGenderEvent] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedSchoolId, setSelectedSchoolId] = useState('')
 
-  const schools = useSchools(classification)
+  useEffect(() => {
+    if (!seasonId && currentSeason) setSeasonId(currentSeason.id)
+  }, [seasonId, currentSeason])
+
+  const schools = useSchools(seasonId, classification)
   const selectedSchool = schools.find((s) => s.id === selectedSchoolId) ?? null
 
   useEffect(() => {
+    if (!seasonId) return
     let active = true
     setLoading(true)
     async function loadAll() {
@@ -60,7 +68,13 @@ export default function PrintReport() {
         results[gender] = {}
         await Promise.all(
           EVENTS.map(async (event) => {
-            results[gender][event.id] = await fetchLeaderboard(event.id, gender, classification, 16)
+            results[gender][event.id] = await fetchLeaderboard(
+              event.id,
+              gender,
+              seasonId,
+              classification,
+              16
+            )
           })
         )
       }
@@ -73,10 +87,15 @@ export default function PrintReport() {
     return () => {
       active = false
     }
-  }, [classification])
+  }, [seasonId, classification])
 
   function handleClassificationChange(value) {
     setClassification(value)
+    setSelectedSchoolId('')
+  }
+
+  function handleSeasonChange(value) {
+    setSeasonId(value)
     setSelectedSchoolId('')
   }
 
@@ -126,13 +145,24 @@ export default function PrintReport() {
 
       <div className="no-print flex items-center justify-between px-4 py-4 bg-paper border-b border-charcoal/10 sticky top-0 gap-4">
         <div>
-          <p className="font-display uppercase tracking-wide text-lg">{classification} rankings report</p>
+          <p className="font-display uppercase tracking-wide text-lg">{classification} rankings report — {seasons.find((s) => s.id === seasonId)?.name ?? ""}</p>
           <p className="text-xs text-graphite">
             Use your browser's print dialog. To get each sheet's front and back on one physical
             page, enable "print on both sides" — otherwise front and back print separately.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <select
+            value={seasonId}
+            onChange={(e) => handleSeasonChange(e.target.value)}
+            className="border border-charcoal/20 rounded px-2 py-2 text-sm"
+          >
+            {seasons.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
           <select
             value={classification}
             onChange={(e) => handleClassificationChange(e.target.value)}
