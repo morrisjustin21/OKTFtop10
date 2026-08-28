@@ -6,6 +6,7 @@ import { EVENTS } from '../data/mockResults.js'
 import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
 
 export default function Leaderboard() {
+  const [classification, setClassification] = useState('5A')
   const [gender, setGender] = useState('boys')
   const [activeEventId, setActiveEventId] = useState(EVENTS[0].id)
   const [results, setResults] = useState([])
@@ -16,7 +17,7 @@ export default function Leaderboard() {
   useEffect(() => {
     let active = true
     setLoading(true)
-    fetchLeaderboard(activeEventId, gender, '5A', 16).then((data) => {
+    fetchLeaderboard(activeEventId, gender, classification, 16).then((data) => {
       if (active) {
         setResults(data)
         setLoading(false)
@@ -25,11 +26,16 @@ export default function Leaderboard() {
     return () => {
       active = false
     }
-  }, [activeEventId, gender])
+  }, [activeEventId, gender, classification])
 
   return (
     <div className="min-h-screen">
-      <Header gender={gender} onGenderChange={setGender} />
+      <Header
+        gender={gender}
+        onGenderChange={setGender}
+        classification={classification}
+        onClassificationChange={setClassification}
+      />
       <EventTabs events={EVENTS} activeEvent={activeEventId} onSelect={setActiveEventId} />
 
       <main className="max-w-4xl mx-auto px-4 py-4">
