@@ -75,7 +75,12 @@ export default function AthleteProfile() {
                   {group.results.map((r) => (
                     <tr key={r.id} className="border-t border-charcoal/10">
                       <td className="px-4 py-2.5">{r.meetName}</td>
-                      <td className="px-2 py-2.5 text-graphite">{formatDate(r.meetDate)}</td>
+                      <td className="px-2 py-2.5 text-graphite">
+                        {formatDate(r.meetDate)}
+                        {r.seasonName && (
+                          <span className="text-xs text-graphite/70"> &middot; {r.seasonName}</span>
+                        )}
+                      </td>
                       <td className="px-4 py-2.5 text-right mark text-base">
                         {r.mark}
                         {r.isBest && (
