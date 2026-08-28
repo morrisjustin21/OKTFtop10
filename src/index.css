@@ -3,21 +3,20 @@
 @tailwind utilities;
 
 body {
-  @apply bg-lane text-charcoal font-body;
+  @apply bg-paper text-charcoal font-body;
 }
 
-/* Signature motif: a dashed lane line, used as a section divider and as the
-   underline on the active event tab. Evokes the painted lines on a track
-   without leaning on a literal illustration. */
+/* Signature motif: a dashed divider line, used as a section break and as
+   the underline on the active event tab. */
 .lane-line {
   background-image: repeating-linear-gradient(
     90deg,
-    theme('colors.lane') 0,
-    theme('colors.lane') 10px,
+    theme('colors.paper') 0,
+    theme('colors.paper') 10px,
     transparent 10px,
     transparent 18px
   );
-  background-color: theme('colors.cinder.DEFAULT');
+  background-color: theme('colors.slate.DEFAULT');
   height: 4px;
 }
 
