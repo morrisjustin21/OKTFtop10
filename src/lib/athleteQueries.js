@@ -14,7 +14,7 @@ export async function fetchAthleteProfile(athleteId) {
 
   const { data: results, error: resultsError } = await supabase
     .from('results')
-    .select('id, event_id, mark_value, mark_display, meets(name, meet_date)')
+    .select('id, event_id, mark_value, mark_display, meets(name, meet_date, seasons(name))')
     .eq('athlete_id', athleteId)
     .eq('verified', true)
     .order('meet_date', { foreignTable: 'meets', ascending: true })
@@ -47,6 +47,7 @@ export async function fetchAthleteProfile(athleteId) {
         id: r.id,
         meetName: r.meets?.name ?? 'Unknown meet',
         meetDate: r.meets?.meet_date,
+        seasonName: r.meets?.seasons?.name ?? '',
         mark: r.mark_display,
         isBest: r.mark_value === bestValue,
       })),
