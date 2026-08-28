@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient.js'
 
-export async function findOrCreateMeet(name, date) {
+export async function findOrCreateMeet(name, date, seasonId) {
   const { data: existing } = await supabase
     .from('meets')
     .select('id')
@@ -11,7 +11,7 @@ export async function findOrCreateMeet(name, date) {
 
   const { data: created, error } = await supabase
     .from('meets')
-    .insert({ name, meet_date: date })
+    .insert({ name, meet_date: date, season_id: seasonId })
     .select('id')
     .single()
   if (error) throw error
