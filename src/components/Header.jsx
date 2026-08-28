@@ -1,19 +1,19 @@
 export default function Header({ gender, onGenderChange }) {
   return (
     <header>
-      <div className="bg-cinder text-lane">
+      <div className="bg-slate text-paper">
         <div className="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between gap-4">
           <div>
             <p className="font-display uppercase tracking-wide text-2xl leading-none">
               OK Track Rankings
             </p>
-            <p className="text-sm text-lane/80 mt-1">Class 5A &middot; outdoor season</p>
+            <p className="text-sm text-paper/80 mt-1">Class 5A &middot; outdoor season</p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             {/* Only 5A is active for launch — schema already supports more classes */}
             <select
-              className="bg-cinder-dark text-lane border border-lane/30 rounded px-3 py-1.5 text-sm font-body"
+              className="bg-slate-dark text-paper border border-paper/30 rounded px-3 py-1.5 text-sm font-body"
               value="5A"
               disabled
             >
@@ -26,10 +26,10 @@ export default function Header({ gender, onGenderChange }) {
               </option>
             </select>
 
-            <div className="flex bg-cinder-dark rounded overflow-hidden border border-lane/30">
+            <div className="flex bg-slate-dark rounded overflow-hidden border border-paper/30">
               <button
                 className={`px-3 py-1.5 text-sm font-body ${
-                  gender === 'boys' ? 'bg-lane text-charcoal' : 'text-lane'
+                  gender === 'boys' ? 'bg-paper text-charcoal' : 'text-paper'
                 }`}
                 onClick={() => onGenderChange('boys')}
               >
@@ -37,7 +37,7 @@ export default function Header({ gender, onGenderChange }) {
               </button>
               <button
                 className={`px-3 py-1.5 text-sm font-body ${
-                  gender === 'girls' ? 'bg-lane text-charcoal' : 'text-lane'
+                  gender === 'girls' ? 'bg-paper text-charcoal' : 'text-paper'
                 }`}
                 onClick={() => onGenderChange('girls')}
               >
