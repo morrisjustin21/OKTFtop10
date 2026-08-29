@@ -4,7 +4,7 @@ import { parseMarkValue } from '../lib/marks.js'
 import { useSchools } from '../lib/useSchools.js'
 import { useSeasons } from '../lib/useSeasons.js'
 import { extractTextLines } from '../lib/pdfText.js'
-import { parseResultsText } from '../lib/resultsParser.js'
+import { parseAnyFormat } from '../lib/parseAnyFormat.js'
 import {
   findOrCreateMeet,
   findOrCreateAthlete,
@@ -46,6 +46,7 @@ export default function PdfImportForm() {
   const [parseError, setParseError] = useState(null)
   const [importing, setImporting] = useState(false)
   const [importSummary, setImportSummary] = useState(null)
+  const [detectedFormat, setDetectedFormat] = useState(null)
   const [pastedText, setPastedText] = useState('')
   const [inputMode, setInputMode] = useState('pdf') // 'pdf' | 'paste'
 
@@ -55,11 +56,12 @@ export default function PdfImportForm() {
 
   const schools = useSchools(seasonId, classification)
 
-  function buildRowsFromParsed(parsed) {
+  function buildRowsFromParsed(lines) {
+    const { rows: parsed, formatName } = parseAnyFormat(lines)
     if (parsed.length === 0) {
       setParseError(
-        "Couldn't find any result rows. The layout may differ from what the parser expects — " +
-          'share a copy with me and I can tune it to match.'
+        "Couldn't find any result rows in a known format (checked MileSplit raw exports and " +
+          'the web results export style). Share a copy with me and I can add support for it.'
       )
       setRows([])
       return
@@ -80,11 +82,15 @@ export default function PdfImportForm() {
                   { firstName: '', lastName: '' },
                 ]
             : undefined,
-        // Non-scoring statuses (DQ, DNF, NM, etc.) aren't real marks —
-        // leave them unchecked so they don't get imported by mistake.
-        include: !NON_SCORING_MARKS.has(r.markRaw.toUpperCase()),
+        // Non-scoring statuses (DQ, DNF, NM, etc.) aren't real marks, and
+        // non-HS divisions (MS/Open, from formats like MileSplit that mix
+        // levels in one meet) aren't relevant to a high-school-only site —
+        // both come in unchecked so they don't get imported by mistake.
+        include:
+          !NON_SCORING_MARKS.has(r.markRaw.toUpperCase()) && (!r.level || r.level === 'HS'),
       }))
     )
+    setDetectedFormat(formatName)
   }
 
   async function handleFileChange(e) {
@@ -95,7 +101,7 @@ export default function PdfImportForm() {
     setParsing(true)
     try {
       const lines = await extractTextLines(file)
-      buildRowsFromParsed(parseResultsText(lines))
+      buildRowsFromParsed(lines)
     } catch (err) {
       setParseError(`Couldn't read that PDF: ${err.message}`)
     } finally {
@@ -106,8 +112,7 @@ export default function PdfImportForm() {
   function handleParsePastedText() {
     setParseError(null)
     setImportSummary(null)
-    const lines = pastedText.split('\n')
-    buildRowsFromParsed(parseResultsText(lines))
+    buildRowsFromParsed(pastedText.split('\n'))
   }
 
   function updateRow(id, patch) {
@@ -340,6 +345,9 @@ export default function PdfImportForm() {
 
       {parsing && <p className="text-sm text-graphite">Reading the PDF…</p>}
       {parseError && <p className="text-sm text-red-600 mb-3">{parseError}</p>}
+      {detectedFormat && rows && rows.length > 0 && (
+        <p className="text-xs text-graphite mb-3">Detected format: {detectedFormat}</p>
+      )}
 
       {importSummary && (
         <p className="text-sm text-green-700 mb-3">
@@ -373,6 +381,9 @@ export default function PdfImportForm() {
                         checked={row.include}
                         onChange={(e) => updateRow(row.id, { include: e.target.checked })}
                       />
+                      {row.level && row.level !== 'HS' && (
+                        <p className="text-xs text-graphite mt-1">{row.level} division</p>
+                      )}
                       {row.failReason && (
                         <p className="text-xs text-red-600 mt-1 max-w-[140px]">{row.failReason}</p>
                       )}
