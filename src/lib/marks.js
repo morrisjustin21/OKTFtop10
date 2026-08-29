@@ -17,9 +17,11 @@ function parseTime(raw) {
 
 // Accepts "21'04\"" (feet + inches), Hy-Tek's "21-04.00" (feet-inches.
 // hundredths) format, or a plain decimal like "21.33" (feet) — returns
-// total feet as a decimal.
+// total feet as a decimal. A trailing letters-only suffix (e.g. "PB",
+// "SB" for personal/season best, sometimes seen appended directly to a
+// mark with no space) is stripped first so it doesn't block the match.
 function parseDistance(raw) {
-  const value = raw.trim()
+  const value = raw.trim().replace(/[A-Za-z]+$/, '')
 
   const feetInchesQuote = value.match(/^(\d+)'\s*(\d+(?:\.\d+)?)"?$/)
   if (feetInchesQuote) {
