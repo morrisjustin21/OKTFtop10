@@ -13,7 +13,6 @@ import {
 } from '../lib/resultsRepository.js'
 import SchoolPicker from './SchoolPicker.jsx'
 
-const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 const NON_SCORING_MARKS = new Set(['DNS', 'DNF', 'DQ', 'SCR', 'NM', 'NH'])
 
 function guessSchool(schools, schoolRaw) {
@@ -38,7 +37,6 @@ function guessSchool(schools, schoolRaw) {
 export default function PdfImportForm() {
   const { seasons, currentSeason } = useSeasons()
   const [seasonId, setSeasonId] = useState('')
-  const [classification, setClassification] = useState('5A')
   const [meetName, setMeetName] = useState('')
   const [meetDate, setMeetDate] = useState('')
   const [parsing, setParsing] = useState(false)
@@ -54,7 +52,9 @@ export default function PdfImportForm() {
     if (!seasonId && currentSeason) setSeasonId(currentSeason.id)
   }, [seasonId, currentSeason])
 
-  const schools = useSchools(seasonId, classification)
+  // No classification filter here — a single meet's results usually span
+  // several classes, so match against every school in the season at once.
+  const schools = useSchools(seasonId)
 
   function buildRowsFromParsed(lines) {
     const { rows: parsed, formatName } = parseAnyFormat(lines)
@@ -229,7 +229,7 @@ export default function PdfImportForm() {
         unchecked automatically since they aren't real marks.
       </p>
 
-      <div className="grid md:grid-cols-4 gap-3 mb-4">
+      <div className="grid md:grid-cols-3 gap-3 mb-4">
         <div>
           <label className="text-xs uppercase tracking-wide text-graphite">Season</label>
           <select
@@ -241,20 +241,6 @@ export default function PdfImportForm() {
               <option key={s.id} value={s.id}>
                 {s.name}
                 {s.is_current ? ' (current)' : ''}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-xs uppercase tracking-wide text-graphite">Classification</label>
-          <select
-            value={classification}
-            onChange={(e) => setClassification(e.target.value)}
-            className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
-          >
-            {CLASSIFICATIONS.map((c) => (
-              <option key={c} value={c}>
-                {c}
               </option>
             ))}
           </select>
