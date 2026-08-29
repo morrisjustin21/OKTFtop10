@@ -10,7 +10,7 @@ import SeasonsManager from '../components/SeasonsManager.jsx'
 export default function Admin() {
   const [session, setSession] = useState(null)
   const [checkedSession, setCheckedSession] = useState(false)
-  const [section, setSection] = useState('results') // 'results' | 'pdf' | 'teams' | 'seasons'
+  const [section, setSection] = useState('pdf') // 'pdf' | 'teams' | 'seasons' | 'results'
 
   useEffect(() => {
     if (!supabase) {
@@ -67,16 +67,6 @@ export default function Admin() {
       <main className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex gap-2 mb-6 border-b border-charcoal/10">
           <button
-            onClick={() => setSection('results')}
-            className={`px-3 py-2 text-sm font-body border-b-2 ${
-              section === 'results'
-                ? 'border-accent text-charcoal font-medium'
-                : 'border-transparent text-graphite hover:text-charcoal'
-            }`}
-          >
-            Results entry
-          </button>
-          <button
             onClick={() => setSection('pdf')}
             className={`px-3 py-2 text-sm font-body border-b-2 ${
               section === 'pdf'
@@ -84,7 +74,7 @@ export default function Admin() {
                 : 'border-transparent text-graphite hover:text-charcoal'
             }`}
           >
-            Import PDF
+            Enter Results
           </button>
           <button
             onClick={() => setSection('teams')}
@@ -106,12 +96,22 @@ export default function Admin() {
           >
             Seasons
           </button>
+          <button
+            onClick={() => setSection('results')}
+            className={`px-3 py-2 text-sm font-body border-b-2 ${
+              section === 'results'
+                ? 'border-accent text-charcoal font-medium'
+                : 'border-transparent text-graphite hover:text-charcoal'
+            }`}
+          >
+            Individual Entry
+          </button>
         </div>
 
-        {section === 'results' && <ResultsEntryForm />}
         {section === 'pdf' && <PdfImportForm />}
         {section === 'teams' && <TeamsEntryForm />}
         {section === 'seasons' && <SeasonsManager />}
+        {section === 'results' && <ResultsEntryForm />}
       </main>
     </div>
   )
