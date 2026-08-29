@@ -2,10 +2,14 @@
 // "====" separator bars, "Yr"/"H#" abbreviated columns, and the trailing
 // "a" (auto/electronic timing) or "h" (hand timing) suffix on times.
 // This is a very common export format across many timing companies, not
-// specific to any one platform. Verified against a real meet export.
+// specific to any one platform. Verified against two real meet exports
+// with different level wording (one used "Varsity"/"JV", another used
+// "High School"/"Freshman") — the level word itself is informational
+// only and doesn't need to be a fixed set, since event matching works
+// against the whole heading remainder regardless of what precedes it.
 //
 // Individual/field events:
-//   Boys Varsity 100 Meters
+//   Boys Varsity 100 Meters       (or: Boys High School 100 Meters)
 //   ============================================================
 //    Athlete Yr Team Mark H#
 //   ============================================================
@@ -13,7 +17,8 @@
 //    -- Ben Cruz 12 Moore DNS
 //
 // Relays list the team + time, then a separate line naming the squad
-// letter (no runner names in this format):
+// letter (no runner names in this format). Place is usually numeric or
+// "--", but has also been seen as "X" for exhibition/unofficial entries:
 //   Boys Varsity 4x100 Relay
 //   ======================================================
 //    Team Time H#
@@ -23,7 +28,17 @@
 
 import { EVENTS } from '../data/mockResults.js'
 
-const HEADING_RE = /^(Boys|Girls)\s+(?:Varsity|JV|Junior Varsity)\s+(.+)$/i
+const HEADING_RE = /^(Boys|Girls)\s+(.+)$/i
+
+// Freshman-level results get flagged for review (same idea as MileSplit's
+// MS/Open flag) since they're a different competitive tier than varsity;
+// everything else (Varsity, JV, Junior Varsity, High School, or no level
+// word at all) is treated as standard and included by default.
+const LEVEL_WORDS_RE = /\b(Varsity|JV|Junior Varsity|High School|Freshman)\b/i
+function normalizeLevel(word) {
+  if (!word) return null
+  return word.toLowerCase() === 'freshman' ? 'FRESHMAN' : 'HS'
+}
 
 const EVENT_KEYWORDS = [
   { id: 'shortH', patterns: [/100m hurdles/i, /110m hurdles/i] },
@@ -60,13 +75,15 @@ const SEP_RE = /^=+$/
 const IND_HEADER_RE = /^\s*Athlete\s+Yr\s+Team\s+Mark\s+H#\s*$/i
 const RELAY_HEADER_RE = /^\s*Team\s+Time\s+H#\s*$/i
 
-// Grade anchors the split between name and team — both can be
-// multi-word Title Case, so there's no other reliable boundary.
+// Place is usually numeric or "--", but "X" has also been seen for
+// exhibition/unofficial entries. Grade anchors the split between name
+// and team — both can be multi-word Title Case, so there's no other
+// reliable boundary.
 const IND_ROW_RE =
-  /^\s*(\d+|--)\s+(.+?)\s+(\d{1,2})\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|\d{1,3}-\d{1,2}(?:\.\d+)?|DNS|DQ|ND|NH|DNF|SCR|NM)\s*(\d+)?\s*$/
+  /^\s*(\d+|--|X)\s+(.+?)\s+(\d{1,2})\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|\d{1,3}-\d{1,2}(?:\.\d+)?|DNS|DQ|ND|NH|DNF|SCR|NM)\s*(\d+)?\s*$/
 
 const RELAY_ROW_RE =
-  /^\s*(\d+|--)\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|DNS|DQ|SCR)\s*(\d+)?\s*$/
+  /^\s*(\d+|--|X)\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|DNS|DQ|SCR)\s*(\d+)?\s*$/
 
 const LEG_LETTER_RE = /^\s*\d+\)\s*([A-Z])\s*$/
 
@@ -74,6 +91,7 @@ export function parseHyTekText(lines) {
   const rows = []
   let currentEventId = null
   let currentGender = null
+  let currentLevel = null
 
   for (const raw of lines) {
     if (!raw.trim()) continue
@@ -82,6 +100,8 @@ export function parseHyTekText(lines) {
     if (heading) {
       currentGender = heading[1].toLowerCase() === 'girls' ? 'girls' : 'boys'
       currentEventId = matchEventId(heading[2])
+      const levelMatch = heading[2].match(LEVEL_WORDS_RE)
+      currentLevel = normalizeLevel(levelMatch ? levelMatch[1] : null)
       continue
     }
 
@@ -103,7 +123,8 @@ export function parseHyTekText(lines) {
           type: 'relay',
           eventId: currentEventId,
           gender: currentGender ?? 'boys',
-          place: place === '--' ? null : parseInt(place, 10),
+          level: currentLevel,
+          place: place === '--' || place === 'X' ? null : parseInt(place, 10),
           schoolRaw: team.trim(),
           markRaw: markRaw.trim(),
         })
@@ -121,7 +142,8 @@ export function parseHyTekText(lines) {
         type: 'individual',
         eventId: currentEventId,
         gender: currentGender ?? 'boys',
-        place: place === '--' ? null : parseInt(place, 10),
+        level: currentLevel,
+        place: place === '--' || place === 'X' ? null : parseInt(place, 10),
         firstName,
         lastName,
         schoolRaw: team.trim(),
