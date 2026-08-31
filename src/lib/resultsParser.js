@@ -27,6 +27,8 @@
 // "EDMOND NOR…" for Edmond North) — the raw truncated text is kept as
 // schoolRaw so the review table's school picker can prefix-match it.
 
+import { normalizeGrade } from './grade.js'
+
 const HEADING_RE = /^#\d+\s+(Girls|Boys)\W*\s+(.+)$/i
 
 // Team names may include apostrophes, periods, hyphens, parentheses (e.g.
@@ -40,7 +42,7 @@ const RELAY_ROW_RE = new RegExp(
 const ROW_RE = new RegExp(
   '^(\\d+|--)\\s+' +
     "([A-Za-z.'\\-]+(?:\\s[A-Za-z.'\\-]+)*,\\s*[A-Za-z0-9 .'\\-()]+?)\\s+" +
-    '(?:(?:\\d{1,2}|FR|SO|JR|SR)\\s+)?' +
+    '(?:(\\d{1,2}|FR|SO|JR|SR)\\s+)?' +
     `(${TEAM})\\s+` +
     '((?:\\d{1,2}:)?\\d{1,3}\\.\\d{2}|\\d{1,3}-\\d{1,2}\\.\\d{2}|DNS|DNF|DQ|SCR|NM|NH)\\s*' +
     '(\\d+(?:\\.\\d+)?)?\\s*(?:\\(\\d+(?:\\.\\d+)?\\))?\\s*$'
@@ -142,7 +144,7 @@ export function parseResultsText(lines) {
 
     const rowMatch = line.match(ROW_RE)
     if (rowMatch) {
-      const [, place, nameRaw, teamRaw, markRaw] = rowMatch
+      const [, place, nameRaw, gradeRaw, teamRaw, markRaw] = rowMatch
       const [lastName, firstNameRaw] = nameRaw.split(',').map((s) => s.trim())
       rows.push({
         type: 'individual',
@@ -153,6 +155,7 @@ export function parseResultsText(lines) {
         lastName: lastName ?? '',
         schoolRaw: teamRaw.trim(),
         markRaw: markRaw.trim(),
+        grade: normalizeGrade(gradeRaw),
       })
     }
   }
