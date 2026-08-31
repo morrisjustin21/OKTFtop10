@@ -490,3 +490,16 @@ export default function PdfImportForm() {
               </tbody>
             </table>
           </div>
+
+          <button
+            onClick={handleImport}
+            disabled={importing}
+            className="bg-accent text-white rounded px-4 py-2 font-body disabled:opacity-60"
+          >
+            {importing ? 'Importing…' : `Import ${rows.filter((r) => r.include).length} result(s)`}
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
