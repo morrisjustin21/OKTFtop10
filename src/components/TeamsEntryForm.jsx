@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
 import { useSeasons } from '../lib/useSeasons.js'
+import { schoolNamesMatch } from '../lib/schoolNameMatch.js'
 
 const CLASSIFICATIONS = ['6A', '5A', '4A', '3A', '2A', 'A']
 
@@ -43,12 +44,12 @@ export default function TeamsEntryForm() {
     setTeams(list)
   }
 
-  async function findOrCreateSchool(name) {
-    const { data: existing } = await supabase
-      .from('schools')
-      .select('id')
-      .ilike('name', name)
-      .maybeSingle()
+  // Checked against every existing school (not just an exact match) so
+  // "Duncan" and "Duncan High School" always resolve to the same school,
+  // even if they're pasted in at different times — this is a universal
+  // rule, not a per-school alias someone has to remember to add.
+  async function findOrCreateSchool(name, allSchools) {
+    const existing = allSchools.find((s) => schoolNamesMatch(s.name, name))
     if (existing) return existing.id
 
     const { data: created, error } = await supabase
@@ -57,6 +58,7 @@ export default function TeamsEntryForm() {
       .select('id')
       .single()
     if (error) throw error
+    allSchools.push({ id: created.id, name }) // so later names in this same paste can match it too
     return created.id
   }
 
@@ -76,8 +78,13 @@ export default function TeamsEntryForm() {
 
     setLoading(true)
     try {
+      const { data: allSchools, error: fetchError } = await supabase
+        .from('schools')
+        .select('id, name')
+      if (fetchError) throw fetchError
+
       for (const name of names) {
-        const schoolId = await findOrCreateSchool(name)
+        const schoolId = await findOrCreateSchool(name, allSchools)
         const { error } = await supabase
           .from('school_seasons')
           .upsert(
