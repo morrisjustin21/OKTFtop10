@@ -192,6 +192,7 @@ export default function PdfImportForm() {
               gender: row.gender,
               markValue,
               markDisplay: row.markRaw.trim(),
+              grade: row.grade,
               source: 'csv',
               verified: true,
             })
@@ -430,21 +431,26 @@ export default function PdfImportForm() {
                           ))}
                         </div>
                       ) : (
-                        <div className="flex gap-1">
-                          <input
-                            type="text"
-                            value={row.firstName}
-                            onChange={(e) => updateRow(row.id, { firstName: e.target.value })}
-                            placeholder="First"
-                            className="w-20 border border-charcoal/20 rounded px-2 py-1 text-sm"
-                          />
-                          <input
-                            type="text"
-                            value={row.lastName}
-                            onChange={(e) => updateRow(row.id, { lastName: e.target.value })}
-                            placeholder="Last"
-                            className="w-24 border border-charcoal/20 rounded px-2 py-1 text-sm"
-                          />
+                        <div>
+                          <div className="flex gap-1">
+                            <input
+                              type="text"
+                              value={row.firstName}
+                              onChange={(e) => updateRow(row.id, { firstName: e.target.value })}
+                              placeholder="First"
+                              className="w-20 border border-charcoal/20 rounded px-2 py-1 text-sm"
+                            />
+                            <input
+                              type="text"
+                              value={row.lastName}
+                              onChange={(e) => updateRow(row.id, { lastName: e.target.value })}
+                              placeholder="Last"
+                              className="w-24 border border-charcoal/20 rounded px-2 py-1 text-sm"
+                            />
+                          </div>
+                          {row.grade && (
+                            <p className="text-xs text-graphite mt-1">Grade {row.grade}</p>
+                          )}
                         </div>
                       )}
                     </td>
