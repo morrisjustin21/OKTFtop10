@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { normalizeSchoolName } from '../lib/schoolNameMatch.js'
 
 export default function SchoolPicker({ schools, value, onChange, placeholder }) {
   const [query, setQuery] = useState(value?.name ?? '')
@@ -12,9 +13,13 @@ export default function SchoolPicker({ schools, value, onChange, placeholder }) 
   const matches = query.trim()
     ? schools.filter((s) => {
         const q = query.toLowerCase()
+        const qNormalized = normalizeSchoolName(query)
         return (
           s.name.toLowerCase().includes(q) ||
-          (s.aliases ?? []).some((a) => a.toLowerCase().includes(q))
+          normalizeSchoolName(s.name).includes(qNormalized) ||
+          (s.aliases ?? []).some(
+            (a) => a.toLowerCase().includes(q) || normalizeSchoolName(a).includes(qNormalized)
+          )
         )
       })
     : []
