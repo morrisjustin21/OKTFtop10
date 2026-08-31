@@ -46,6 +46,7 @@ export async function insertResult({
   markValue,
   markDisplay,
   wind,
+  grade,
   source = 'manual',
   verified = true,
 }) {
@@ -57,6 +58,7 @@ export async function insertResult({
     mark_value: markValue,
     mark_display: markDisplay,
     wind: wind || null,
+    grade: grade || null,
     source,
     verified,
   })
