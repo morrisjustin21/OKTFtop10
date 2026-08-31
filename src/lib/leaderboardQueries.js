@@ -95,7 +95,7 @@ export async function fetchLeaderboard(eventId, gender, seasonId, classification
   const { data, error } = await supabase
     .from('results')
     .select(
-      'id, mark_value, mark_display, athletes!inner(id, first_name, last_name, school_id, schools(name)), meets!inner(name, meet_date, season_id)'
+      'id, mark_value, mark_display, grade, athletes!inner(id, first_name, last_name, school_id, schools(name)), meets!inner(name, meet_date, season_id)'
     )
     .eq('event_id', eventId)
     .eq('gender', gender)
@@ -121,6 +121,7 @@ export async function fetchLeaderboard(eventId, gender, seasonId, classification
     deduped.push({
       athleteId,
       athlete: `${r.athletes?.first_name ?? ''} ${r.athletes?.last_name ?? ''}`.trim(),
+      grade: r.grade ?? null,
       school: r.athletes?.schools?.name ?? 'Unknown',
       mark: r.mark_display,
       meetName: r.meets?.name ?? '',
