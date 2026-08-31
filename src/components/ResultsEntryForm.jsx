@@ -18,6 +18,7 @@ export default function ResultsEntryForm() {
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [grade, setGrade] = useState('')
   const [meetName, setMeetName] = useState('')
   const [meetDate, setMeetDate] = useState('')
   const [markRaw, setMarkRaw] = useState('')
@@ -79,6 +80,7 @@ export default function ResultsEntryForm() {
         markValue,
         markDisplay: markRaw.trim(),
         wind: wind.trim() ? parseFloat(wind) : null,
+        grade: grade.trim() ? parseInt(grade.trim(), 10) : null,
         source: 'manual',
         verified: true,
       })
@@ -97,6 +99,7 @@ export default function ResultsEntryForm() {
       // the same meet; only clear the per-athlete fields.
       setFirstName('')
       setLastName('')
+      setGrade('')
       setMarkRaw('')
       setWind('')
     } catch (err) {
@@ -192,7 +195,7 @@ export default function ResultsEntryForm() {
             <SchoolPicker schools={schools} value={selectedSchool} onChange={setSelectedSchool} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-xs uppercase tracking-wide text-graphite">
                 Athlete first name
@@ -214,6 +217,22 @@ export default function ResultsEntryForm() {
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
               />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-graphite">
+                Grade (optional)
+              </label>
+              <select
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+                className="w-full border border-charcoal/20 rounded px-3 py-2 mt-1"
+              >
+                <option value="">—</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select>
             </div>
           </div>
 
