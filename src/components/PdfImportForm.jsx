@@ -11,25 +11,32 @@ import {
   insertResult,
   insertRelayResult,
 } from '../lib/resultsRepository.js'
+import { normalizeSchoolName, schoolNamesMatch } from '../lib/schoolNameMatch.js'
 import SchoolPicker from './SchoolPicker.jsx'
 
 const NON_SCORING_MARKS = new Set(['DNS', 'DNF', 'DQ', 'SCR', 'NM', 'NH'])
 
 function guessSchool(schools, schoolRaw) {
   if (!schoolRaw) return null
-  let q = schoolRaw.toLowerCase().trim()
+  let q = schoolRaw.trim()
   // Long team names get truncated with an ellipsis in narrower table
   // columns (e.g. "EDMOND NOR…" for Edmond North) — treat that as a
   // prefix to match against, not a literal substring.
   const truncated = q.endsWith('\u2026')
   if (truncated) q = q.slice(0, -1).trim()
+  const qLower = q.toLowerCase()
+  const qNormalized = normalizeSchoolName(q)
 
   return (
-    schools.find((s) => s.name.toLowerCase() === q) ??
+    // Exact match, or exact match once "High School"/"HS" is stripped
+    // from either side (e.g. "Duncan" ↔ "Duncan High School").
+    schools.find((s) => schoolNamesMatch(s.name, q)) ??
     schools.find((s) =>
-      truncated ? s.name.toLowerCase().startsWith(q) : s.name.toLowerCase().includes(q)
+      truncated
+        ? s.name.toLowerCase().startsWith(qLower) || normalizeSchoolName(s.name).startsWith(qNormalized)
+        : s.name.toLowerCase().includes(qLower) || normalizeSchoolName(s.name).includes(qNormalized)
     ) ??
-    schools.find((s) => (s.aliases ?? []).some((a) => a.toLowerCase() === q)) ??
+    schools.find((s) => (s.aliases ?? []).some((a) => schoolNamesMatch(a, q))) ??
     null
   )
 }
@@ -483,16 +490,3 @@ export default function PdfImportForm() {
               </tbody>
             </table>
           </div>
-
-          <button
-            onClick={handleImport}
-            disabled={importing}
-            className="bg-accent text-white rounded px-4 py-2 font-body disabled:opacity-60"
-          >
-            {importing ? 'Importing…' : `Import ${rows.filter((r) => r.include).length} result(s)`}
-          </button>
-        </>
-      )}
-    </div>
-  )
-}
