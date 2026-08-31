@@ -22,6 +22,8 @@
 // relay row format hasn't been verified against real data yet — bring a
 // sample of an actual relay result and it can be added.
 
+import { normalizeGrade } from './grade.js'
+
 const HEADING_RE =
   /^(Girls|Boys|Women|Men)\s+(?:Girls|Boys|Women's|Men's)\s+(.+?)\s*\(([A-Za-z]+)\)\s*(Finals|Prelims|Semis)?\s*$/i
 
@@ -89,6 +91,7 @@ export function parseMileSplitText(lines) {
     if (fields.length - idx < 5) continue
 
     const name = fields[idx]
+    const gradeRaw = fields[idx + 1]
     const team = fields[idx + 3]
     const markRaw = fields[idx + 4]
     if (!name || !team || !markRaw) continue
@@ -107,6 +110,7 @@ export function parseMileSplitText(lines) {
       lastName,
       schoolRaw: team,
       markRaw,
+      grade: normalizeGrade(gradeRaw),
     })
   }
 
