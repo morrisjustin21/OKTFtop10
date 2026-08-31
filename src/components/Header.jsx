@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { formatDateTime } from '../lib/formatDate.js'
 
 const OK_BLUE = '#0073CF'
 
@@ -10,6 +11,7 @@ export default function Header({
   seasons,
   seasonId,
   onSeasonChange,
+  lastUpdated,
 }) {
   const activeSeasonName = (seasons ?? []).find((s) => s.id === seasonId)?.name ?? ''
 
@@ -32,6 +34,11 @@ export default function Header({
               <p className="text-sm text-paper/80 mt-1">
                 Class {classification} &middot; {activeSeasonName}
               </p>
+              {lastUpdated && (
+                <p className="text-xs text-paper/60 mt-0.5">
+                  Last updated {formatDateTime(lastUpdated)}
+                </p>
+              )}
             </div>
           </div>
 
@@ -79,6 +86,13 @@ export default function Header({
                 Girls
               </button>
             </div>
+
+            <Link
+              to="/meets"
+              className="text-sm underline text-paper/80 hover:text-paper whitespace-nowrap"
+            >
+              Meets
+            </Link>
 
             <Link
               to="/print"
