@@ -28,6 +28,7 @@
 //   McLain - A
 
 import { EVENTS } from '../data/mockResults.js'
+import { normalizeGrade } from './grade.js'
 
 const GENDER_SECTION_RE = /^(Mens|Womens|Men's|Women's)\s+Results\s*$/i
 const HEADING_RE =
@@ -152,7 +153,7 @@ export function parseTwoLineText(lines) {
 
     const m = line.match(IND_ROW_RE)
     if (m) {
-      const [, placeNum, placeDash, , name, markRaw] = m
+      const [, placeNum, placeDash, gradeRaw, name, markRaw] = m
       const place = placeDash || !placeNum ? null : parseInt(placeNum, 10)
       const school = i + 1 < lines.length ? lines[i + 1].trim() : ''
       const { firstName, lastName } = splitName(name)
@@ -165,6 +166,7 @@ export function parseTwoLineText(lines) {
         lastName,
         schoolRaw: school,
         markRaw: markRaw.trim(),
+        grade: normalizeGrade(gradeRaw),
       })
       i += 2
       continue
