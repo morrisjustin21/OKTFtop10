@@ -6,7 +6,7 @@ export default function EventTabs({ events, activeEvent, onSelect }) {
   const renderGroup = (label, group) => (
     <div className="mb-3">
       <p className="text-xs uppercase tracking-wide text-graphite mb-1.5">{label}</p>
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex flex-wrap gap-2 pb-1">
         {group.map((event) => {
           const isActive = event.id === activeEvent
           return (
