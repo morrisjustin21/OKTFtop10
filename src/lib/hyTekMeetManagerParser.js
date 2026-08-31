@@ -27,6 +27,7 @@
 //    1) A
 
 import { EVENTS } from '../data/mockResults.js'
+import { normalizeGrade } from './grade.js'
 
 const HEADING_RE = /^(Boys|Girls)\s+(.+)$/i
 
@@ -134,7 +135,7 @@ export function parseHyTekText(lines) {
 
     const m = raw.match(IND_ROW_RE)
     if (m) {
-      const [, place, name, , team, markRaw] = m
+      const [, place, name, gradeRaw, team, markRaw] = m
       const nameParts = name.trim().split(' ')
       const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : name.trim()
       const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''
@@ -148,6 +149,7 @@ export function parseHyTekText(lines) {
         lastName,
         schoolRaw: team.trim(),
         markRaw: markRaw.trim(),
+        grade: normalizeGrade(gradeRaw),
       })
     }
   }
