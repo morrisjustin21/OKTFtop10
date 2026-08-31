@@ -54,6 +54,7 @@ export default function LeaderboardTable({ event, gender, results }) {
                     ) : (
                       r.athlete
                     )}
+                    {r.grade && <span className="text-graphite font-normal"> ({r.grade})</span>}
                   </td>
                   <td className="px-2 py-2.5 text-graphite">
                     {r.school}
