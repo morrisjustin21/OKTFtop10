@@ -4,6 +4,7 @@ import EventTabs from '../components/EventTabs.jsx'
 import LeaderboardTable from '../components/LeaderboardTable.jsx'
 import { EVENTS } from '../data/mockResults.js'
 import { fetchLeaderboard } from '../lib/leaderboardQueries.js'
+import { fetchLastUpdated } from '../lib/siteMetaQueries.js'
 import { useSeasons } from '../lib/useSeasons.js'
 
 export default function Leaderboard() {
@@ -14,10 +15,16 @@ export default function Leaderboard() {
   const [activeEventId, setActiveEventId] = useState(EVENTS[0].id)
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState(null)
 
   useEffect(() => {
     if (!seasonId && currentSeason) setSeasonId(currentSeason.id)
   }, [seasonId, currentSeason])
+
+  useEffect(() => {
+    if (!seasonId) return
+    fetchLastUpdated(seasonId).then(setLastUpdated)
+  }, [seasonId])
 
   const activeEvent = EVENTS.find((e) => e.id === activeEventId)
 
@@ -46,6 +53,7 @@ export default function Leaderboard() {
         seasons={seasons}
         seasonId={seasonId}
         onSeasonChange={setSeasonId}
+        lastUpdated={lastUpdated}
       />
       <EventTabs events={EVENTS} activeEvent={activeEventId} onSelect={setActiveEventId} />
 
