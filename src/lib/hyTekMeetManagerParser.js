@@ -42,18 +42,18 @@ function normalizeLevel(word) {
 }
 
 const EVENT_KEYWORDS = [
-  { id: 'shortH', patterns: [/100m hurdles/i, /110m hurdles/i] },
-  { id: '300H', patterns: [/300m hurdles/i] },
-  { id: '4x100', patterns: [/4x100 relay/i] },
-  { id: '4x200', patterns: [/4x200 relay/i] },
-  { id: '4x400', patterns: [/4x400 relay/i] },
-  { id: '4x800', patterns: [/4x800 relay/i] },
-  { id: '3200m', patterns: [/\b3200 meters\b/i] },
-  { id: '1600m', patterns: [/\b1600 meters\b/i] },
-  { id: '800m', patterns: [/\b800 meters\b/i] },
-  { id: '400m', patterns: [/\b400 meters\b/i] },
-  { id: '200m', patterns: [/\b200 meters\b/i] },
-  { id: '100m', patterns: [/\b100 meters\b/i] },
+  { id: 'shortH', patterns: [/100\s*meters?\s+hurdles/i, /110\s*meters?\s+hurdles/i, /100m hurdles/i, /110m hurdles/i] },
+  { id: '300H', patterns: [/300\s*meters?\s+hurdles/i, /300m hurdles/i] },
+  { id: '4x100', patterns: [/4x100\s*(?:meters?)?\s*relay/i] },
+  { id: '4x200', patterns: [/4x200\s*(?:meters?)?\s*relay/i] },
+  { id: '4x400', patterns: [/4x400\s*(?:meters?)?\s*relay/i] },
+  { id: '4x800', patterns: [/4x800\s*(?:meters?)?\s*relay/i] },
+  { id: '3200m', patterns: [/\b3200\s*meters?\b/i] },
+  { id: '1600m', patterns: [/\b1600\s*meters?\b/i] },
+  { id: '800m', patterns: [/\b800\s*meters?\b/i] },
+  { id: '400m', patterns: [/\b400\s*meters?\b/i] },
+  { id: '200m', patterns: [/\b200\s*meters?\b/i] },
+  { id: '100m', patterns: [/\b100\s*meters?\b/i] },
   { id: 'LJ', patterns: [/long jump/i] },
   { id: 'HJ', patterns: [/high jump/i] },
   { id: 'PV', patterns: [/pole vault/i] },
@@ -73,18 +73,19 @@ function isRelay(eventId) {
 }
 
 const SEP_RE = /^=+$/
-const IND_HEADER_RE = /^\s*Athlete\s+Yr\s+Team\s+Mark\s+H#\s*$/i
-const RELAY_HEADER_RE = /^\s*Team\s+Time\s+H#\s*$/i
+const IND_HEADER_RE = /^\s*(?:Athlete|Name)\s+Yr\s+Team\s+Mark\s+H#(?:\s+Wind)?\s*$/i
+const RELAY_HEADER_RE = /^\s*(?:Team\s+Time\s+H#|Name\s+Yr\s+Team\s+Mark\s+H#(?:\s+Wind)?)\s*$/i
 
 // Place is usually numeric or "--", but "X" has also been seen for
 // exhibition/unofficial entries. Grade anchors the split between name
 // and team — both can be multi-word Title Case, so there's no other
-// reliable boundary.
+// reliable boundary. Some field events (long/triple jump) list a wind
+// reading after the heat number, e.g. "19-5.25 2 -0.0".
 const IND_ROW_RE =
-  /^\s*(\d+|--|X)\s+(.+?)\s+(\d{1,2})\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|\d{1,3}-\d{1,2}(?:\.\d+)?|DNS|DQ|ND|NH|DNF|SCR|NM)\s*(\d+)?\s*$/
+  /^\s*(\d+|--|X)\s+(.+?)\s+(\d{1,2})\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|\d{1,3}-\d{1,2}(?:\.\d+)?|DNS|DQ|ND|NH|DNF|SCR|NM)\s*(\d+)?\s*(-?\d+\.\d+)?\s*$/
 
 const RELAY_ROW_RE =
-  /^\s*(\d+|--|X)\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|DNS|DQ|SCR)\s*(\d+)?\s*$/
+  /^\s*(\d+|--|X)\s+(.+?)\s+((?:\d{1,2}:)?\d{1,3}\.\d{2}[ah]?|DNS|DQ|SCR)\s*(\d+)?\s*(-?\d+\.\d+)?\s*$/
 
 const LEG_LETTER_RE = /^\s*\d+\)\s*([A-Z])\s*$/
 
